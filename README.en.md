@@ -4,7 +4,7 @@
 
 Runnable proxy integration examples, practical use cases, troubleshooting guides, and reproducible testing methods for Python, Node.js, Playwright, Selenium, cURL, and other tools.
 
-This project is maintained by Andrey, founder of **Proxy.Market**.
+This project is maintained by Andrey.
 
 ## What you will find here
 
