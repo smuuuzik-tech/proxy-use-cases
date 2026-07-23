@@ -33,9 +33,6 @@ DevOps/SRE и команд, которым нужен воспроизводим
   клиента, прокси-пула и наблюдаемости.
 - [Шаблон SLO и runbook](docs/B2B-SLO-AND-RUNBOOK.md) — метрики, состояния и
   порядок действий при инциденте.
-- [Контентный план](docs/CONTENT-ROADMAP.md) — следующие решения.
-- [План развития GitHub на 90 дней](docs/GITHUB-GROWTH-PLAN.md) — продуктовая
-  очередь, система блогов, воронка и метрики.
 - [Proxy.Market API 1.1](integrations/proxy-market-api/) — технический
   vendor-specific разбор и безопасный B2B-клиент.
 
