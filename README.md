@@ -11,6 +11,9 @@ DevOps/SRE и команд, которым нужен воспроизводим
 не привязаны к конкретному продавцу прокси; особенности публичных API вынесены
 в отдельные технические разборы.
 
+**Нужно разобрать корпоративный сценарий?**
+[Открыть экспертную страницу и выбрать время звонка](https://andrey-proxy-advisor-private.vercel.app/github?utm_source=github&utm_medium=readme&utm_campaign=proxy_use_cases).
+
 ## Выберите уровень
 
 | Уровень | Задача | Рабочее решение |
@@ -31,6 +34,8 @@ DevOps/SRE и команд, которым нужен воспроизводим
 - [Шаблон SLO и runbook](docs/B2B-SLO-AND-RUNBOOK.md) — метрики, состояния и
   порядок действий при инциденте.
 - [Контентный план](docs/CONTENT-ROADMAP.md) — следующие решения.
+- [План развития GitHub на 90 дней](docs/GITHUB-GROWTH-PLAN.md) — продуктовая
+  очередь, система блогов, воронка и метрики.
 - [Proxy.Market API 1.1](integrations/proxy-market-api/) — технический
   vendor-specific разбор и безопасный B2B-клиент.
 
