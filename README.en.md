@@ -7,7 +7,8 @@ connectivity smoke test to a production HTTP client, proxy-pool monitoring, and
 evidence-oriented regional web QA.
 
 The project is maintained by Andrey for developers, technical leaders, DevOps,
-SRE, and platform teams.
+SRE, and platform teams. The core solutions remain provider-neutral; public API
+specifics live in separate technical studies.
 
 ## Choose a level
 
@@ -27,6 +28,8 @@ code verification.
 - [Reference architecture](docs/B2B-REFERENCE-ARCHITECTURE.md)
 - [SLO and incident runbook template](docs/B2B-SLO-AND-RUNBOOK.md)
 - [Content roadmap](docs/CONTENT-ROADMAP.md)
+- [Proxy.Market API 1.1](integrations/proxy-market-api/) — a vendor-specific
+  technical study and defensive B2B client.
 
 ## Engineering defaults
 
