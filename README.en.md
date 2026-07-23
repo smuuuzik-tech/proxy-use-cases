@@ -27,7 +27,6 @@ code verification.
 - [Maturity model](docs/B2B-MATURITY-MODEL.md)
 - [Reference architecture](docs/B2B-REFERENCE-ARCHITECTURE.md)
 - [SLO and incident runbook template](docs/B2B-SLO-AND-RUNBOOK.md)
-- [Content roadmap](docs/CONTENT-ROADMAP.md)
 - [Proxy.Market API 1.1](integrations/proxy-market-api/) — a vendor-specific
   technical study and defensive B2B client.
 
