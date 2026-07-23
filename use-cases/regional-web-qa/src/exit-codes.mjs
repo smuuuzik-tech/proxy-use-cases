@@ -1,0 +1,9 @@
+export const ExitCode = Object.freeze({
+  OK: 0,
+  UNEXPECTED: 1,
+  CONFIGURATION: 2,
+  BROWSER_UNAVAILABLE: 3,
+  NAVIGATION_FAILED: 4,
+  ASSERTION_FAILED: 5,
+  ARTIFACT_WRITE_FAILED: 6,
+});
