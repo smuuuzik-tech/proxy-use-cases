@@ -19,13 +19,11 @@ This project is maintained by Andrey.
 
 Examples use the standard `PROXY_URL`, `PROXY_USER`, and `PROXY_PASSWORD` environment variables and are designed to work with different providers whenever possible.
 
-The author's relationship with Proxy.Market is disclosed transparently. Tests performed with Proxy.Market are labeled as such.
+Examples are not tied to a specific provider and use standard HTTP/SOCKS interfaces.
 
-## Consultation
+## For B2B teams
 
-Need help designing a proxy architecture for your workload, regions, stack, and quality requirements?
-
-**[Discuss your use case and solution](https://b2b.proxy.market/?utm_source=github&utm_medium=repository&utm_campaign=proxy-use-cases&utm_content=readme-en)**
+The materials progress from connectivity checks to production configuration, observability, health checks, and measurable quality criteria.
 
 ## Status
 
