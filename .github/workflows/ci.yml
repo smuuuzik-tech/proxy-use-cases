@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  curl-quickstart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Validate shell syntax
+        run: |
+          bash -n quickstarts/curl/check_proxy.sh
+          bash -n tests/shell/test_curl_quickstart.sh
+      - name: Run offline shell tests
+        run: bash tests/shell/test_curl_quickstart.sh
+
+  python-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            integrations/python-production/requirements.txt
+            integrations/python-production/requirements-dev.txt
+      - name: Install
+        working-directory: integrations/python-production
+        run: python -m pip install -e '.[dev]'
+      - name: Test
+        working-directory: integrations/python-production
+        run: python -m pytest
+
+  proxy-healthcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.11"
+      - name: Test
+        working-directory: tools/proxy-healthcheck
+        run: |
+          python -m pip install -e .
+          python -m unittest discover -s tests -v
+      - name: Compile
+        working-directory: tools/proxy-healthcheck
+        run: python -m compileall -q src tests
+
+  regional-web-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: use-cases/regional-web-qa
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: use-cases/regional-web-qa/package-lock.json
+      - name: Install without browser download
+        run: npm ci --ignore-scripts
+      - name: Test
+        run: npm test
+      - name: Check CLI syntax
+        run: npm run check

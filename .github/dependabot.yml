@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: pip
+    directory: /integrations/python-production
+    schedule:
+      interval: monthly
+  - package-ecosystem: npm
+    directory: /use-cases/regional-web-qa
+    schedule:
+      interval: monthly

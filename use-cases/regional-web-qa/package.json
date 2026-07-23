@@ -1,0 +1,19 @@
+{
+  "name": "regional-web-qa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Provider-neutral Playwright evidence runner for authorized regional web QA.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node --check src/cli.mjs",
+    "start": "node src/cli.mjs",
+    "test": "node --test",
+    "test:e2e": "node src/cli.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.61.0"
+  }
+}

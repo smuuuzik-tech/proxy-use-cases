@@ -1,0 +1,27 @@
+{
+  "proxy_url": "http://proxy.example.internal:8080",
+  "endpoints": [
+    {
+      "name": "company-ip-check",
+      "url": "https://status.example.com/my-ip",
+      "ip_json_path": "ip",
+      "expected_status": [200],
+      "minimum_unique_ips": 1
+    },
+    {
+      "name": "company-egress-check",
+      "url": "https://status-backup.example.com/my-ip",
+      "ip_json_path": "data.address",
+      "expected_status": [200]
+    }
+  ],
+  "requests_per_endpoint": 5,
+  "concurrency": 10,
+  "timeout_seconds": 5,
+  "retry_budget": 1,
+  "retry_backoff_seconds": 0.2,
+  "minimum_success_rate": 0.95,
+  "fail_below_success_rate": 0.5,
+  "maximum_p95_ms": 2000,
+  "minimum_unique_ips": 1
+}
