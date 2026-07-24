@@ -13,7 +13,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "1.0"
+      "const": "1.1"
     },
     "route": {
       "type": "object",
@@ -29,14 +29,13 @@
         "selected": {
           "enum": [
             "http_proxy",
-            "browser",
-            "managed_unblocker",
-            "ai_extraction"
+            "browser"
           ]
         },
         "reason": {
           "enum": [
-            "configured_http_proxy"
+            "configured_http_proxy",
+            "manual_browser_approval"
           ]
         },
         "next_action": {
@@ -63,7 +62,41 @@
           },
           "uniqueItems": true
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "selected": {
+                "const": "http_proxy"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "const": "configured_http_proxy"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selected": {
+                "const": "browser"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "const": "manual_browser_approval"
+              }
+            }
+          }
+        }
+      ]
     },
     "quality": {
       "type": "object",

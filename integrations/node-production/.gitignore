@@ -3,3 +3,6 @@ node_modules/
 .env
 headers.private.json
 body.private.json
+acceptance.private.json
+.browser-jobs/
+.local-acceptance/

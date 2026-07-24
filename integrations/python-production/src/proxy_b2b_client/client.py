@@ -195,7 +195,7 @@ class B2BHttpClient:
             "limits": limits,
             "follow_redirects": settings.follow_redirects,
             "trust_env": False,
-            "headers": {"User-Agent": "andrey-proxy-sdk/0.2.0"},
+            "headers": {"User-Agent": "andrey-proxy-sdk/0.3.0"},
         }
         if transport is None:
             kwargs["proxy"] = settings.authenticated_proxy_url

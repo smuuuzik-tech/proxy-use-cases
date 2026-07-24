@@ -1,6 +1,6 @@
 {
   "$schema": "./catalog.schema.json",
-  "catalog_version": "1.1.0",
+  "catalog_version": "1.2.0",
   "name": "Andrey Malyshev B2B Proxy Toolkit",
   "default_language": "ru",
   "documentation_languages": [
@@ -21,13 +21,14 @@
   "contracts": [
     {
       "id": "proxy-execution",
-      "schema_version": "1.0",
+      "schema_version": "1.1",
       "path": "contracts/proxy-execution.schema.json",
       "applies_to": [
         "python-production",
         "node-production"
       ],
       "fixtures": [
+        "contracts/fixtures/execution-browser-success.json",
         "contracts/fixtures/execution-success.json",
         "contracts/fixtures/execution-timeout.json"
       ]
@@ -110,13 +111,14 @@
       "runtimes": [
         "nodejs",
         "javascript",
-        "typescript"
+        "typescript",
+        "playwright"
       ],
       "path": "integrations/node-production",
       "readme": "integrations/node-production/README.md",
       "test_command": "cd integrations/node-production && npm test",
-      "choose_when": "Прокси нужно встроить в Node.js-сервис с явным ProxyAgent и retry budget.",
-      "avoid_when": "Нужен browser context Playwright или SOCKS-прокси.",
+      "choose_when": "Прокси нужно встроить в Node.js-сервис; HTTP route можно дополнить вручную разрешённым browser route с durable replay.",
+      "avoid_when": "Нужен только разовый smoke test или нет явного разрешения на browser automation.",
       "capabilities": [
         "undici",
         "proxy-agent",
@@ -127,14 +129,23 @@
         "redacted-result",
         "execution-contract",
         "route-decision",
-        "cost-estimate"
+        "cost-estimate",
+        "policy-gated-browser-route",
+        "exact-host-allowlist",
+        "durable-jobs",
+        "integrity-verified-replay",
+        "local-real-proxy-acceptance"
       ],
       "keywords": [
         "nodejs",
         "javascript",
         "typescript",
         "undici",
-        "proxyagent"
+        "proxyagent",
+        "playwright",
+        "browser route",
+        "durable job",
+        "replay"
       ]
     },
     {

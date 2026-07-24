@@ -1,7 +1,7 @@
 {
   "name": "andrey-proxy-sdk-node",
-  "version": "0.2.0",
-  "description": "Provider-neutral Node.js proxy client with bounded retries, timeouts, response limits, and redacted results.",
+  "version": "0.3.0",
+  "description": "Provider-neutral Node.js proxy SDK with bounded HTTP requests and an optional policy-gated browser route with durable replay.",
   "type": "module",
   "main": "./src/client.js",
   "types": "./src/client.d.ts",
@@ -9,19 +9,29 @@
     ".": {
       "types": "./src/client.d.ts",
       "import": "./src/client.js"
+    },
+    "./browser": {
+      "types": "./src/browser.d.ts",
+      "import": "./src/browser.js"
     }
   },
   "bin": {
-    "andrey-proxy-node": "./src/cli.js"
+    "andrey-proxy-node": "./src/cli.js",
+    "andrey-proxy-browser": "./src/browser-cli.js"
   },
   "files": [
     "src",
+    "scripts",
     "README.md",
-    ".env.example"
+    ".env.example",
+    ".env.browser.example",
+    "acceptance.example.json"
   ],
   "scripts": {
-    "check": "node --check src/client.js && node --check src/execution.js && node --check src/cli.js",
+    "check": "node --check src/client.js && node --check src/execution.js && node --check src/job-store.js && node --check src/browser.js && node --check src/acceptance.js && node --check src/browser-cli.js && node --check scripts/local-acceptance.mjs && node --check src/cli.js",
     "test": "node --test",
+    "smoke:cli": "node src/browser-cli.js --help && node scripts/local-acceptance.mjs --help",
+    "acceptance:local": "node scripts/local-acceptance.mjs",
     "pack:check": "npm pack --dry-run"
   },
   "engines": {
@@ -30,11 +40,23 @@
   "dependencies": {
     "undici": "7.28.0"
   },
+  "peerDependencies": {
+    "playwright": ">=1.61.0 <2"
+  },
+  "peerDependenciesMeta": {
+    "playwright": {
+      "optional": true
+    }
+  },
   "keywords": [
     "proxy",
     "http",
     "https",
     "undici",
+    "playwright",
+    "browser",
+    "durable-jobs",
+    "replay",
     "b2b",
     "sdk"
   ],

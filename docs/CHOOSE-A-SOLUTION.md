@@ -14,10 +14,15 @@
 |---|---|
 | Python / HTTPX / worker / ETL | [Andrey Proxy SDK для Python](../integrations/python-production/) |
 | Node.js / JavaScript / TypeScript / Undici | [Andrey Proxy Client для Node.js](../integrations/node-production/) |
+| Playwright внутри Node.js-сервиса, exact allowlist и replay | [Policy-gated Browser Route](BROWSER-ROUTE-AND-REPLAY.md) |
 | Playwright и проверка собственного сайта | [Regional Web QA](../use-cases/regional-web-qa/) |
 
 SDK нужны, когда важны pooling, timeout, retry budget, correlation ID и
 стабильный результат. Для одного ручного запроса SDK избыточен.
+
+Browser Route выбирайте только после проверки обычного HTTP route и явного
+решения владельца сценария. Для настоящего прокси начните с
+[локального acceptance](LOCAL-REAL-PROXY-ACCEPTANCE.md).
 
 ## Интеграция работает, но нестабильно
 

@@ -74,6 +74,17 @@ Node.js-клиент использует явный Undici `ProxyAgent`, отк
 query или исходный transport error. Формат `result.execution` совпадает с
 Python SDK.
 
+## Если HTTP недостаточно
+
+Node.js SDK содержит отдельный
+[policy-gated Browser Route](BROWSER-ROUTE-AND-REPLAY.md). Он требует явного
+approval и exact allowlist, сохраняет приватный durable job и поддерживает
+offline replay с проверкой SHA-256.
+
+Для настоящего endpoint используйте
+[локальный acceptance-план](LOCAL-REAL-PROXY-ACCEPTANCE.md). Password остаётся в
+игнорируемом owner-only файле и не передаётся Андрею или AI сообщением.
+
 ## Если первый запрос не работает
 
 1. Проверьте формат подключения через [cURL quickstart](../quickstarts/curl/).
@@ -92,6 +103,8 @@ Python SDK.
 - Production Python: [Andrey Proxy SDK](../integrations/python-production/).
 - Production Node.js:
   [Andrey Proxy Client](../integrations/node-production/).
+- Разрешённый browser check и replay:
+  [Browser Route](BROWSER-ROUTE-AND-REPLAY.md).
 - Региональная проверка сайта:
   [Regional Web QA](../use-cases/regional-web-qa/).
 - Архитектура и SLO:

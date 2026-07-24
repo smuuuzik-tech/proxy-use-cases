@@ -29,11 +29,18 @@
 - структурированный результат и стабильные exit codes;
 - конфигурация через переменные окружения;
 - тесты не требуют реального прокси.
+- browser route, если он нужен, имеет отдельный approval и exact allowlist;
+- browser job имеет durable state и replay, а не только screenshot.
 
 Артефакты:
 [`integrations/python-production`](../integrations/python-production/) для
 Python и [`integrations/node-production`](../integrations/node-production/) для
 Node.js.
+
+Опциональный Node.js
+[Browser Route](BROWSER-ROUTE-AND-REPLAY.md) остаётся на этом уровне только при
+одном разрешённом сценарии и ограниченной нагрузке. Общий browser service для
+нескольких команд уже требует эксплуатационных controls уровня 3/4.
 
 Переходите на следующий уровень, когда появляются несколько маршрутов, регионов, команд или требования к доступности.
 

@@ -1,0 +1,40 @@
+{
+  "artifact_dir": ".local-acceptance",
+  "proxy": {
+    "url": "replace_me",
+    "username": "replace_me",
+    "password": "replace_me"
+  },
+  "http": {
+    "target_url": "replace_me",
+    "request_id": "local-proxy-acceptance",
+    "fingerprint_json_field": "ip",
+    "body_assertion": {
+      "json_field": "ip",
+      "equals": "replace_me"
+    }
+  },
+  "browser": {
+    "approved": true,
+    "target_url": "replace_me",
+    "target_label": "approved acceptance target",
+    "allowed_hosts": [
+      "replace_me"
+    ],
+    "resource_allowed_hosts": [
+      "replace_me"
+    ],
+    "capture_screenshot": false,
+    "capture_trace": false,
+    "headless": true,
+    "navigation_timeout_ms": 30000,
+    "total_deadline_ms": 60000,
+    "max_requests": 200,
+    "expected_status_min": 200,
+    "expected_status_max": 399
+  },
+  "cost": {
+    "estimated_per_attempt": null,
+    "currency": null
+  }
+}

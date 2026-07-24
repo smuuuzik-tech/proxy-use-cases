@@ -14,6 +14,8 @@ the product documentation of a proxy vendor.
 - [Canonical JSON catalog](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/catalog.json): Machine-readable solution metadata, capabilities, paths, and test commands.
 - [Execution contract](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/EXECUTION-CONTRACT.md): Shared Python/Node.js route, quality, next-action, and optional cost semantics.
 - [Execution JSON Schema](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/contracts/proxy-execution.schema.json): Canonical machine-readable schema and version.
+- [Policy-gated Browser Route](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/BROWSER-ROUTE-AND-REPLAY.md): Manually approved Playwright route with exact allowlists, private durable jobs, and integrity-verified replay.
+- [Local real-proxy acceptance](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/LOCAL-REAL-PROXY-ACCEPTANCE.md): Test HTTP and browser routes without publishing credentials, targets, or observed exit IP.
 - [Repository overview](https://github.com/smuuuzik-tech/proxy-use-cases): Choose a solution by integration maturity or failure symptom.
 - [B2B maturity model](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/B2B-MATURITY-MODEL.md): Decide whether the workload needs a smoke test, SDK, monitoring, or an operational control plane.
 

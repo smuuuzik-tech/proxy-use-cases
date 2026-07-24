@@ -47,10 +47,10 @@ export type ExecutionNextAction =
   | "review_retry_or_escalation";
 
 export interface ProxyExecutionContract {
-  schema_version: "1.0";
+  schema_version: "1.1";
   route: {
-    selected: "http_proxy" | "browser" | "managed_unblocker" | "ai_extraction";
-    reason: "configured_http_proxy";
+    selected: "http_proxy" | "browser";
+    reason: "configured_http_proxy" | "manual_browser_approval";
     next_action: ExecutionNextAction;
     automatic_escalation: false;
     manual_candidates: Array<"browser" | "managed_unblocker" | "ai_extraction">;

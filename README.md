@@ -26,7 +26,7 @@ DevOps/SRE и команд, которым нужен воспроизводим
 |---|---|---|
 | 1. Подключение | Проверить маршрут, авторизацию и внешний IP | [cURL quickstart](quickstarts/curl/) |
 | 2. Интеграция | Встроить прокси в Python с timeout, retry budget и JSON-контрактом | [Andrey Proxy SDK](integrations/python-production/) |
-| 2. Интеграция | Встроить прокси в Node.js с Undici ProxyAgent и безопасными повторами | [Andrey Proxy Client для Node.js](integrations/node-production/) |
+| 2/3. Интеграция | Встроить прокси в Node.js; при явном approval добавить browser route, durable job и replay | [Andrey Proxy Client для Node.js](integrations/node-production/) |
 | 3. Эксплуатация | Измерять success rate, p95, retry amplification, ошибки и состояние пула | [Proxy Healthcheck](tools/proxy-healthcheck/) |
 | 3. Решение | Сравнить пулы по единым SLO и стоимости успешного результата | [Proxybench](tools/proxybench/) |
 | 3/4. Бизнес-процесс | Проверять разрешённый сайт из согласованного региона и сохранять evidence | [Regional Web QA](use-cases/regional-web-qa/) |
@@ -38,6 +38,7 @@ DevOps/SRE и команд, которым нужен воспроизводим
 | `407`, DNS, TLS, timeout, `403`, `429` или обрыв соединения | [Proxy Diagnostics](tools/proxy-diagnostics/) |
 | Нужно выбрать sticky-сессию или rotation на данных workload | [Session Strategy Analyzer](labs/session-strategy/) |
 | Нужно выбрать между двумя или несколькими пулами на измеримых данных | [Proxybench](tools/proxybench/) |
+| HTTP недостаточно для разрешённой проверки | [Policy-gated Browser Route](docs/BROWSER-ROUTE-AND-REPLAY.md) |
 | Нужен изолированный адаптер публичного API конкретного провайдера | [Vendor-specific API client](integrations/proxy-market-api/) |
 
 Все девять решений имеют офлайн-тесты и не требуют настоящих credentials для
@@ -55,6 +56,10 @@ Python и Node.js SDK возвращают одинаковый версиони
   клиента, прокси-пула и наблюдаемости.
 - [Execution Contract](docs/EXECUTION-CONTRACT.md) — единый typed-результат
   Python/Node.js для приложений, мониторинга и AI.
+- [Browser Route and Replay](docs/BROWSER-ROUTE-AND-REPLAY.md) — ручной policy
+  gate, приватные durable jobs и проверяемый replay.
+- [Проверка настоящего прокси](docs/LOCAL-REAL-PROXY-ACCEPTANCE.md) — локальный
+  acceptance без публикации credentials и клиентских targets.
 - [Шаблон SLO и runbook](docs/B2B-SLO-AND-RUNBOOK.md) — метрики, состояния и
   порядок действий при инциденте.
 - [Опциональный API-адаптер](integrations/proxy-market-api/) — пример того,

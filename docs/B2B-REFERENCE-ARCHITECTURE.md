@@ -4,11 +4,17 @@
 flowchart LR
     A["Бизнес-приложение или job"] --> B["Policy и конфигурация"]
     B --> C["HTTP-клиент с timeout и retry budget"]
+    B --> J["Ручной browser approval"]
+    J --> K["Изолированный Browser Route"]
     C --> D["Прокси-маршрут или пул"]
+    K --> D
     D --> E["Разрешённый внешний endpoint"]
     C --> F["Структурированные события"]
+    K --> L["Private durable job и receipt"]
+    L --> M["Offline replay и audit"]
     D --> G["Healthcheck"]
     F --> H["Метрики, логи и алерты"]
+    L --> H
     G --> H
     H --> I["SLO и отчётность"]
 ```
@@ -22,6 +28,13 @@ flowchart LR
 ### Production HTTP-клиент
 
 Отвечает за безопасную сборку proxy URL, timeout, повторные попытки, категоризацию ошибок и структурированный результат. Он не должен принимать решение о допустимости бизнес-сценария.
+
+### Policy-gated Browser Route
+
+Используется только после явного approval, когда HTTP route не даёт требуемого
+разрешённого результата. Browser context изолирован, target и subresources
+проходят exact allowlist, методы и request budget ограничены. Каждый запуск
+создаёт приватный durable job, report и SHA-256 receipt для offline replay.
 
 ### Healthcheck
 

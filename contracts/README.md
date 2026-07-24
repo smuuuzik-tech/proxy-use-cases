@@ -7,6 +7,8 @@
   блока `execution`, одинакового для Python и Node.js;
 - [`fixtures/execution-success.json`](fixtures/execution-success.json) —
   успешный запрос без настроенной оценки стоимости;
+- [`fixtures/execution-browser-success.json`](fixtures/execution-browser-success.json) —
+  вручную разрешённый browser route;
 - [`fixtures/execution-timeout.json`](fixtures/execution-timeout.json) —
   исчерпанный timeout budget с оценкой стоимости попыток.
 

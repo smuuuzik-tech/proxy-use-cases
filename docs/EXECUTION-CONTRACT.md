@@ -45,7 +45,7 @@ if (result.execution.route.next_action !== "complete") {
 
 ```json
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "route": {
     "selected": "http_proxy",
     "reason": "configured_http_proxy",
@@ -76,8 +76,15 @@ if (result.execution.route.next_action !== "complete") {
 
 ### `route`
 
-Текущие SDK выполняют только `http_proxy`. Они не запускают браузер, managed
-unblocker или AI автоматически.
+HTTP SDK выполняет `http_proxy`. Опциональный Browser Route выполняет `browser`
+только после явного policy approval. Managed unblocker и AI не запускаются
+автоматически.
+
+Версия `1.1` добавляет browser execution:
+
+- `selected=browser`;
+- `reason=manual_browser_approval`;
+- durable job и replay остаются вне самого компактного execution block.
 
 `manual_candidates` — лестница возможных классов решения, а не разрешение,
 рекомендация поставщика или подтверждение законности target. Перед переходом
@@ -155,5 +162,6 @@ cd ../node-production && npm test
 
 The versioned `execution` block gives Python, Node.js, observability systems, and
 AI assistants the same sanitized view of route, decision, attempts, outcome,
-next action, and optional estimated cost. Escalation is always manual; candidate
-routes are not authorization to access a target.
+next action, and optional estimated cost. Version 1.1 covers both HTTP proxy and
+manually approved browser routes. Escalation is always manual; candidate routes
+are not authorization to access a target.

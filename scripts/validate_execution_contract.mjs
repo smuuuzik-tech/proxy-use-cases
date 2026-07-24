@@ -10,11 +10,12 @@ const readJson = (path) =>
   JSON.parse(readFileSync(resolve(root, path), "utf8"));
 
 const schema = readJson("contracts/proxy-execution.schema.json");
+const browser = readJson("contracts/fixtures/execution-browser-success.json");
 const success = readJson("contracts/fixtures/execution-success.json");
 const timeout = readJson("contracts/fixtures/execution-timeout.json");
 
 assert.equal(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
-assert.equal(schema.properties.schema_version.const, "1.0");
+assert.equal(schema.properties.schema_version.const, "1.1");
 assert.deepEqual(schema.required, [
   "schema_version",
   "route",
@@ -22,6 +23,17 @@ assert.deepEqual(schema.required, [
   "cost",
 ]);
 
+assert.deepEqual(
+  buildExecutionContract({
+    ok: true,
+    attempts: 1,
+    elapsedMs: 925,
+    statusCode: 200,
+    selectedRoute: "browser",
+    routeReason: "manual_browser_approval",
+  }),
+  browser,
+);
 assert.deepEqual(
   buildExecutionContract({
     ok: true,
@@ -44,11 +56,10 @@ assert.deepEqual(
   timeout,
 );
 
-for (const fixture of [success, timeout]) {
-  assert.equal(fixture.route.selected, "http_proxy");
+for (const fixture of [browser, success, timeout]) {
   assert.equal(fixture.route.automatic_escalation, false);
   assert.equal(fixture.quality.retries, Math.max(0, fixture.quality.attempts - 1));
   assert.ok(!JSON.stringify(fixture).match(/password|token|proxy_url|target_url/i));
 }
 
-process.stdout.write("Execution contract OK: schema 1.0, 2 fixtures.\n");
+process.stdout.write("Execution contract OK: schema 1.1, 3 fixtures.\n");
