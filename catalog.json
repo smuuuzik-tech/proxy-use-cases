@@ -1,0 +1,275 @@
+{
+  "$schema": "./catalog.schema.json",
+  "catalog_version": "1.0.0",
+  "name": "Andrey Malyshev B2B Proxy Toolkit",
+  "default_language": "ru",
+  "documentation_languages": [
+    "ru",
+    "en"
+  ],
+  "maintainer": {
+    "name": "Andrey Malyshev",
+    "github": "https://github.com/smuuuzik-tech",
+    "consultation_url": "https://andrey-proxy-advisor-private.vercel.app/github?utm_source=github&utm_medium=catalog_json&utm_campaign=b2b_proxy_sdk"
+  },
+  "safety": [
+    "Use only with systems and data the organization is authorized to access.",
+    "Never place real credentials, client data, or private targets in examples.",
+    "Keep proxy credentials separate from proxy and target URLs.",
+    "Prefer provider-neutral solutions unless a specific public provider API is required."
+  ],
+  "solutions": [
+    {
+      "id": "curl-quickstart",
+      "title": "Проверка прокси через cURL",
+      "title_en": "Proxy connectivity check with cURL",
+      "category": "quickstart",
+      "maturity_level": 1,
+      "status": "stable",
+      "provider_neutral": true,
+      "runtimes": [
+        "shell"
+      ],
+      "path": "quickstarts/curl",
+      "readme": "quickstarts/curl/README.md",
+      "test_command": "bash tests/shell/test_curl_quickstart.sh",
+      "choose_when": "Нужно воспроизводимо проверить маршрут, авторизацию и внешний IP до интеграции в код.",
+      "avoid_when": "Нужны connection pooling, retries или постоянный мониторинг.",
+      "capabilities": [
+        "connectivity",
+        "proxy-authentication",
+        "egress-ip",
+        "sanitized-report"
+      ],
+      "keywords": [
+        "curl",
+        "smoke test",
+        "407",
+        "external ip"
+      ]
+    },
+    {
+      "id": "python-production",
+      "title": "Andrey Proxy SDK для Python",
+      "title_en": "Andrey Proxy SDK for Python",
+      "category": "sdk",
+      "maturity_level": 2,
+      "status": "stable",
+      "provider_neutral": true,
+      "runtimes": [
+        "python"
+      ],
+      "path": "integrations/python-production",
+      "readme": "integrations/python-production/README.md",
+      "test_command": "cd integrations/python-production && python -m pytest",
+      "choose_when": "Прокси нужно встроить в Python-сервис, worker или ETL с безопасными повторами.",
+      "avoid_when": "Нужна браузерная автоматизация или только разовая проверка.",
+      "capabilities": [
+        "httpx",
+        "connection-pooling",
+        "bounded-retries",
+        "timeouts",
+        "response-limit",
+        "correlation-id",
+        "redacted-result"
+      ],
+      "keywords": [
+        "python",
+        "httpx",
+        "sdk",
+        "etl",
+        "retry"
+      ]
+    },
+    {
+      "id": "node-production",
+      "title": "Andrey Proxy Client для Node.js",
+      "title_en": "Andrey Proxy Client for Node.js",
+      "category": "sdk",
+      "maturity_level": 2,
+      "status": "beta",
+      "provider_neutral": true,
+      "runtimes": [
+        "nodejs",
+        "javascript",
+        "typescript"
+      ],
+      "path": "integrations/node-production",
+      "readme": "integrations/node-production/README.md",
+      "test_command": "cd integrations/node-production && npm test",
+      "choose_when": "Прокси нужно встроить в Node.js-сервис с явным ProxyAgent и retry budget.",
+      "avoid_when": "Нужен browser context Playwright или SOCKS-прокси.",
+      "capabilities": [
+        "undici",
+        "proxy-agent",
+        "bounded-retries",
+        "timeouts",
+        "response-limit",
+        "correlation-id",
+        "redacted-result"
+      ],
+      "keywords": [
+        "nodejs",
+        "javascript",
+        "typescript",
+        "undici",
+        "proxyagent"
+      ]
+    },
+    {
+      "id": "proxy-healthcheck",
+      "title": "Proxy Healthcheck",
+      "title_en": "Proxy Healthcheck",
+      "category": "tool",
+      "maturity_level": 3,
+      "status": "stable",
+      "provider_neutral": true,
+      "runtimes": [
+        "python"
+      ],
+      "path": "tools/proxy-healthcheck",
+      "readme": "tools/proxy-healthcheck/README.md",
+      "test_command": "cd tools/proxy-healthcheck && python -m unittest discover -s tests -v",
+      "choose_when": "Нужно постоянно измерять состояние пула и подключить проверку к CI или мониторингу.",
+      "avoid_when": "Нужно определить первопричину одного сложного инцидента.",
+      "capabilities": [
+        "availability",
+        "latency",
+        "egress-ip",
+        "rotation-health",
+        "ci-exit-codes"
+      ],
+      "keywords": [
+        "monitoring",
+        "healthcheck",
+        "sre",
+        "latency"
+      ]
+    },
+    {
+      "id": "proxy-diagnostics",
+      "title": "Proxy Diagnostics",
+      "title_en": "Proxy Diagnostics",
+      "category": "tool",
+      "maturity_level": 3,
+      "status": "stable",
+      "provider_neutral": true,
+      "runtimes": [
+        "python"
+      ],
+      "path": "tools/proxy-diagnostics",
+      "readme": "tools/proxy-diagnostics/README.md",
+      "test_command": "cd tools/proxy-diagnostics && python -m unittest discover -s tests -v",
+      "choose_when": "Команды называют разные причины ошибки и нужен единый безопасный отчёт.",
+      "avoid_when": "Нужен постоянный SLO-мониторинг вместо диагностики сбоя.",
+      "capabilities": [
+        "407",
+        "dns",
+        "timeout",
+        "tls",
+        "403",
+        "429",
+        "redaction"
+      ],
+      "keywords": [
+        "407",
+        "403",
+        "429",
+        "dns",
+        "tls",
+        "diagnostics"
+      ]
+    },
+    {
+      "id": "session-strategy",
+      "title": "Session Strategy Analyzer",
+      "title_en": "Session Strategy Analyzer",
+      "category": "lab",
+      "maturity_level": 3,
+      "status": "stable",
+      "provider_neutral": true,
+      "runtimes": [
+        "python"
+      ],
+      "path": "labs/session-strategy",
+      "readme": "labs/session-strategy/README.md",
+      "test_command": "cd labs/session-strategy && python -m unittest discover -s tests -v",
+      "choose_when": "Sticky и rotating нужно сравнить на данных собственной нагрузки.",
+      "avoid_when": "Нет журналов запросов или единого контролируемого эксперимента.",
+      "capabilities": [
+        "sticky-vs-rotating",
+        "success-rate",
+        "p95",
+        "cost-per-success",
+        "session-continuity"
+      ],
+      "keywords": [
+        "sticky",
+        "rotating",
+        "session",
+        "cost",
+        "p95"
+      ]
+    },
+    {
+      "id": "regional-web-qa",
+      "title": "Региональный Web QA",
+      "title_en": "Regional Web QA",
+      "category": "use_case",
+      "maturity_level": 4,
+      "status": "stable",
+      "provider_neutral": true,
+      "runtimes": [
+        "nodejs",
+        "playwright"
+      ],
+      "path": "use-cases/regional-web-qa",
+      "readme": "use-cases/regional-web-qa/README.md",
+      "test_command": "cd use-cases/regional-web-qa && npm test",
+      "choose_when": "Нужно воспроизводимо проверить разрешённый сайт из согласованного региона.",
+      "avoid_when": "Нет разрешения владельца сайта или нужна скрытая автоматизация.",
+      "capabilities": [
+        "playwright",
+        "allowlisted-targets",
+        "regional-validation",
+        "evidence-report"
+      ],
+      "keywords": [
+        "playwright",
+        "qa",
+        "geo",
+        "localization",
+        "evidence"
+      ]
+    },
+    {
+      "id": "provider-api-adapter",
+      "title": "Изолированный адаптер API провайдера",
+      "title_en": "Isolated provider API adapter",
+      "category": "vendor_adapter",
+      "maturity_level": 3,
+      "status": "stable",
+      "provider_neutral": false,
+      "runtimes": [
+        "python"
+      ],
+      "path": "integrations/proxy-market-api",
+      "readme": "integrations/proxy-market-api/README.md",
+      "test_command": "cd integrations/proxy-market-api && python -m pytest",
+      "choose_when": "Бизнес-логика не должна напрямую зависеть от контракта конкретного публичного API.",
+      "avoid_when": "Нужен обычный HTTP(S)-прокси или провайдер ещё не выбран.",
+      "capabilities": [
+        "typed-api-client",
+        "contract-validation",
+        "idempotency",
+        "destructive-operation-guards"
+      ],
+      "keywords": [
+        "api",
+        "adapter",
+        "vendor isolation",
+        "control plane"
+      ]
+    }
+  ]
+}

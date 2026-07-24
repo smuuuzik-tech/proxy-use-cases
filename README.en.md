@@ -12,7 +12,9 @@ specifics live in separate technical studies.
 
 **Sending this repository to a client?**
 [Start with the client integration guide](docs/CLIENT-START-HERE.md): it covers
-Andrey's personal Python SDK, safe credentials, and the diagnostic path.
+Andrey's personal Python and Node.js clients, safe credentials, and the
+diagnostic path. Use [Choose a solution](docs/CHOOSE-A-SOLUTION.md) for a
+30-second routing guide.
 
 ## Choose a level
 
@@ -20,6 +22,7 @@ Andrey's personal Python SDK, safe credentials, and the diagnostic path.
 |---|---|---|
 | 1. Connectivity | Verify routing, authentication, and observed egress IP | [cURL quickstart](quickstarts/curl/) |
 | 2. Integration | Integrate proxies in Python with timeouts, a retry budget, and a stable result contract | [Andrey Proxy SDK](integrations/python-production/) |
+| 2. Integration | Integrate proxies in Node.js with an explicit Undici ProxyAgent and bounded retries | [Andrey Proxy Client for Node.js](integrations/node-production/) |
 | 3. Operations | Measure success rate, p95 latency, IP rotation, and pool health | [Proxy Healthcheck](tools/proxy-healthcheck/) |
 | 3/4. Business workflow | Test an authorized site from an agreed region and retain evidence | [Regional Web QA](use-cases/regional-web-qa/) |
 
@@ -31,7 +34,7 @@ Andrey's personal Python SDK, safe credentials, and the diagnostic path.
 | Choose sticky sessions or rotation using workload observations | [Session Strategy Analyzer](labs/session-strategy/) |
 | Isolate a provider's public API behind a defensive client | [Vendor-specific API client](integrations/proxy-market-api/) |
 
-All seven solutions include offline tests and require no real credentials for
+All eight solutions include offline tests and require no real credentials for
 code verification.
 
 ## B2B operating model
@@ -42,8 +45,9 @@ code verification.
 - [Optional provider API adapter](integrations/proxy-market-api/) — an example
   of isolating a specific provider contract from the core system.
 
-AI assistants can use the [machine-readable catalog](llms.txt). It complements,
-but does not replace, the README, structured case pages, and GitHub Topics.
+AI assistants should start with [AI Start Here](docs/AI-START-HERE.md) and the
+canonical [`catalog.json`](catalog.json), then use [`llms.txt`](llms.txt) as a
+compact discovery map. CI validates catalog paths and Markdown links.
 
 ## Engineering defaults
 

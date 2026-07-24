@@ -1,0 +1,5 @@
+node_modules/
+*.tgz
+.env
+headers.private.json
+body.private.json
