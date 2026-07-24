@@ -7,6 +7,8 @@ Node.js 20+. Решение использует программно настр
 ## Что уже учтено
 
 - HTTP(S)-прокси с credentials отдельно от URL;
+- явные `pooled` и `fresh_tunnel` стратегии соединения;
+- безопасная диагностика зависимости ротации от нового proxy tunnel;
 - HTTPS target по умолчанию;
 - запрет loopback, private и link-local literal IP без opt-in;
 - connect, headers, body timeouts и общий deadline;
@@ -46,6 +48,11 @@ export B2B_TARGET_URL='https://service.example/health'
 npm exec -- andrey-proxy-node --pretty
 ```
 
+`B2B_CONNECTION_MODE=pooled` переиспользует соединения и является значением по
+умолчанию. `fresh_tunnel` создаёт новое соединение к прокси на каждую сетевую
+попытку. Как измерить разницу и не публиковать exit IP:
+[Стратегии соединения и ротация](../../docs/CONNECTION-STRATEGIES-AND-ROTATION.md).
+
 Опциональная оценка стоимости одной сетевой попытки:
 
 ```bash
@@ -76,6 +83,20 @@ try {
   await proxy.close();
 }
 ```
+
+Для независимых запросов режим можно задать явно:
+
+```js
+const proxy = new ProxyClient({
+  proxyUrl: process.env.B2B_PROXY_URL,
+  proxyUsername: process.env.B2B_PROXY_USERNAME,
+  proxyPassword: process.env.B2B_PROXY_PASSWORD,
+  connectionMode: "fresh_tunnel",
+});
+```
+
+Не используйте `fresh_tunnel` как замену sticky-сессии в многошаговом процессе:
+для него нужен session-aware endpoint поставщика.
 
 `result.execution` типизирован в `client.d.ts`; тот же блок входит в
 `JSON.stringify(result)`. Поля и правила ручной эскалации:
@@ -125,6 +146,17 @@ manifest/events/report/receipt, replay и отсутствие secrets в тек
 artifacts. Пошаговый план:
 [Local Real Proxy Acceptance](../../docs/LOCAL-REAL-PROXY-ACCEPTANCE.md).
 
+Чтобы сравнить `pooled` и `fresh_tunnel` на разрешённом JSON endpoint:
+
+```bash
+export B2B_ROTATION_TARGET_URL='https://authorized.example.net/identity'
+export B2B_ROTATION_TARGET_LABEL='authorized identity endpoint'
+export B2B_ROTATION_JSON_FIELD='ip'
+npm exec -- andrey-proxy-rotation
+```
+
+Отчёт содержит только агрегаты и решение, без наблюдаемых IP и fingerprints.
+
 ## Проверка
 
 ```bash
@@ -137,6 +169,7 @@ npm run pack:check
 
 Provider-neutral Node.js client for authorized B2B proxy workloads. It uses an
 explicit Undici `ProxyAgent`, bounded idempotent retries, granular timeouts, an
-overall deadline, response-size limits, correlation IDs, and redacted results.
-An optional manually approved Playwright route adds durable jobs and
+overall deadline, response-size limits, correlation IDs, explicit pooled or
+fresh-tunnel strategies, safe rotation diagnostics, and redacted results. An
+optional manually approved Playwright route adds durable jobs and
 integrity-verified offline replay.

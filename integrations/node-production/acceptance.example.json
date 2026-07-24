@@ -7,6 +7,7 @@
   },
   "http": {
     "target_url": "replace_me",
+    "connection_mode": "pooled",
     "request_id": "local-proxy-acceptance",
     "fingerprint_json_field": "ip",
     "body_assertion": {

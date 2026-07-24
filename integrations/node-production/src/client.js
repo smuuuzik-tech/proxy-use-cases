@@ -7,7 +7,9 @@ import { buildExecutionContract } from "./execution.js";
 
 const IDEMPOTENT = new Set(["GET", "HEAD", "OPTIONS", "PUT", "DELETE"]);
 const RETRYABLE = new Set([408, 425, 429, 500, 502, 503, 504]);
+const CONNECTION_MODES = new Set(["pooled", "fresh_tunnel"]);
 const DEFAULTS = Object.freeze({
+  connectionMode: "pooled",
   maxAttempts: 3,
   connectTimeoutMs: 10_000,
   headersTimeoutMs: 15_000,
@@ -51,6 +53,7 @@ export class ProxyResult {
     body = null,
     contentType = "",
     error = null,
+    connectionMode = "pooled",
     estimatedCostPerAttempt = null,
     costCurrency = null,
   }) {
@@ -65,6 +68,7 @@ export class ProxyResult {
     this.body = body;
     this.contentType = contentType;
     this.error = error;
+    this.connectionMode = connectionMode;
     this.execution = buildExecutionContract({
       ok,
       attempts,
@@ -88,6 +92,7 @@ export class ProxyResult {
   toJSON() {
     const value = {
       attempts: this.attempts,
+      connection_mode: this.connectionMode,
       elapsed_ms: this.elapsedMs,
       execution: this.execution,
       method: this.method,
@@ -113,6 +118,7 @@ export function settingsFromEnv(env = process.env) {
     proxyUrl: required(env.B2B_PROXY_URL, "B2B_PROXY_URL"),
     proxyUsername: optional(env.B2B_PROXY_USERNAME),
     proxyPassword: optional(env.B2B_PROXY_PASSWORD),
+    connectionMode: connectionMode(env.B2B_CONNECTION_MODE),
     maxAttempts: integer(env.B2B_MAX_ATTEMPTS, 3, 1, 8),
     connectTimeoutMs: integer(env.B2B_CONNECT_TIMEOUT_MS, 10_000, 100, 120_000),
     headersTimeoutMs: integer(env.B2B_HEADERS_TIMEOUT_MS, 15_000, 100, 120_000),
@@ -144,6 +150,7 @@ export class ProxyClient {
     settings,
     {
       dispatcher = null,
+      dispatcherFactory = (options) => new ProxyAgent(options),
       requestFn = undiciRequest,
       sleep = defaultSleep,
       random = Math.random,
@@ -156,9 +163,19 @@ export class ProxyClient {
     this.random = random;
     this.now = now;
     this.closed = false;
-    this.ownsDispatcher = !dispatcher;
+    if (dispatcher && this.settings.connectionMode === "fresh_tunnel") {
+      throw new ProxyConfigError(
+        "An injected dispatcher is incompatible with fresh_tunnel",
+        "INCOMPATIBLE_DISPATCHER",
+      );
+    }
+    this.dispatcherFactory = dispatcherFactory;
+    this.ownsDispatcher =
+      this.settings.connectionMode === "pooled" && !dispatcher;
     this.dispatcher =
-      dispatcher || new ProxyAgent(agentOptions(this.settings));
+      this.settings.connectionMode === "pooled"
+        ? dispatcher || createDispatcher(this.dispatcherFactory, this.settings)
+        : null;
   }
 
   static fromEnv(env = process.env, dependencies = {}) {
@@ -202,7 +219,7 @@ export class ProxyClient {
       const remaining = this.settings.deadlineMs - (this.now() - started);
       if (remaining <= 0) {
         return failed("DEADLINE_EXCEEDED", "timeout", {
-          attempt,
+          attempt: Math.max(0, attempt - 1),
           started,
           method: normalizedMethod,
           requestId,
@@ -215,11 +232,20 @@ export class ProxyClient {
       const signal = options.signal
         ? AbortSignal.any([options.signal, timeoutSignal])
         : timeoutSignal;
-
+      let dispatcher = this.dispatcher;
+      let ownsAttemptDispatcher = false;
+      let outcome;
       try {
+        if (this.settings.connectionMode === "fresh_tunnel") {
+          dispatcher = createDispatcher(
+            this.dispatcherFactory,
+            this.settings,
+          );
+          ownsAttemptDispatcher = true;
+        }
         const response = await this.requestFn(targetUrl, {
           method: normalizedMethod,
-          dispatcher: this.dispatcher,
+          dispatcher,
           headers: Object.fromEntries(headers),
           body: options.body,
           signal,
@@ -231,6 +257,32 @@ export class ProxyClient {
           response.body,
           this.settings.maxResponseBytes,
         );
+        outcome = { type: "response", response, body };
+      } catch (error) {
+        outcome = { type: "error", error };
+      } finally {
+        if (
+          ownsAttemptDispatcher &&
+          !(await closeOwnedDispatcher(dispatcher))
+        ) {
+          outcome = { type: "cleanup_error" };
+        }
+      }
+
+      if (outcome.type === "cleanup_error") {
+        return failed("DISPATCHER_CLOSE_FAILED", "transport", {
+          attempt,
+          started,
+          method: normalizedMethod,
+          requestId,
+          targetUrl,
+          now: this.now,
+          settings: this.settings,
+        });
+      }
+
+      if (outcome.type === "response") {
+        const { response, body } = outcome;
         const result = new ProxyResult({
           ok: response.statusCode >= 200 && response.statusCode < 300,
           statusCode: response.statusCode,
@@ -241,6 +293,7 @@ export class ProxyClient {
           targetUrl,
           body,
           contentType: header(response.headers, "content-type"),
+          connectionMode: this.settings.connectionMode,
           estimatedCostPerAttempt: this.settings.estimatedCostPerAttempt,
           costCurrency: this.settings.costCurrency,
         });
@@ -262,39 +315,8 @@ export class ProxyClient {
         if (!retry.allowed || this.now() - started + retry.delayMs >= this.settings.deadlineMs) {
           return result;
         }
-        await this.sleep(retry.delayMs, options.signal);
-      } catch (error) {
-        const classified = classify(error, options.signal?.aborted === true);
-        if (
-          !canRetry ||
-          attempt === maxAttempts ||
-          classified.kind === "aborted" ||
-          classified.kind === "response_limit"
-        ) {
-          return failed(classified.code, classified.kind, {
-            attempt,
-            started,
-            method: normalizedMethod,
-            requestId,
-            targetUrl,
-            now: this.now,
-            settings: this.settings,
-          });
-        }
-        const delay = backoff(attempt, this.settings, this.random);
-        if (this.now() - started + delay >= this.settings.deadlineMs) {
-          return failed(classified.code, classified.kind, {
-            attempt,
-            started,
-            method: normalizedMethod,
-            requestId,
-            targetUrl,
-            now: this.now,
-            settings: this.settings,
-          });
-        }
         try {
-          await this.sleep(delay, options.signal);
+          await this.sleep(retry.delayMs, options.signal);
         } catch {
           return failed("REQUEST_ABORTED", "aborted", {
             attempt,
@@ -306,6 +328,54 @@ export class ProxyClient {
             settings: this.settings,
           });
         }
+        continue;
+      }
+
+      const classified = classify(
+        outcome.error,
+        options.signal?.aborted === true,
+        timeoutSignal.aborted,
+      );
+      if (
+        !canRetry ||
+        attempt === maxAttempts ||
+        classified.kind === "aborted" ||
+        classified.kind === "response_limit"
+      ) {
+        return failed(classified.code, classified.kind, {
+          attempt,
+          started,
+          method: normalizedMethod,
+          requestId,
+          targetUrl,
+          now: this.now,
+          settings: this.settings,
+        });
+      }
+      const delay = backoff(attempt, this.settings, this.random);
+      if (this.now() - started + delay >= this.settings.deadlineMs) {
+        return failed(classified.code, classified.kind, {
+          attempt,
+          started,
+          method: normalizedMethod,
+          requestId,
+          targetUrl,
+          now: this.now,
+          settings: this.settings,
+        });
+      }
+      try {
+        await this.sleep(delay, options.signal);
+      } catch {
+        return failed("REQUEST_ABORTED", "aborted", {
+          attempt,
+          started,
+          method: normalizedMethod,
+          requestId,
+          targetUrl,
+          now: this.now,
+          settings: this.settings,
+        });
       }
     }
     throw new Error("unreachable");
@@ -339,6 +409,12 @@ function validateSettings(input) {
     throw new ProxyConfigError(
       "proxyUsername and proxyPassword must be provided together",
       "INCOMPLETE_PROXY_CREDENTIALS",
+    );
+  }
+  if (!CONNECTION_MODES.has(settings.connectionMode)) {
+    throw new ProxyConfigError(
+      "connectionMode must be pooled or fresh_tunnel",
+      "INVALID_CONNECTION_MODE",
     );
   }
   const ranges = {
@@ -411,6 +487,39 @@ function agentOptions(settings) {
     ).toString("base64")}`;
   }
   return options;
+}
+
+function createDispatcher(factory, settings) {
+  let dispatcher;
+  try {
+    dispatcher = factory(agentOptions(settings));
+  } catch {
+    throw new ProxyConfigError(
+      "Dispatcher factory failed",
+      "DISPATCHER_CREATE_FAILED",
+    );
+  }
+  if (!dispatcher || typeof dispatcher.close !== "function") {
+    throw new ProxyConfigError(
+      "Dispatcher factory must return a closeable dispatcher",
+      "INVALID_DISPATCHER_FACTORY",
+    );
+  }
+  return dispatcher;
+}
+
+async function closeOwnedDispatcher(dispatcher) {
+  try {
+    await dispatcher.close();
+    return true;
+  } catch {
+    try {
+      await dispatcher.destroy?.();
+    } catch {
+      // The public result remains sanitized even when forced cleanup fails.
+    }
+    return false;
+  }
 }
 
 function validateTarget(target, settings) {
@@ -533,17 +642,20 @@ function backoff(attempt, settings, random) {
   return Math.round(base + random() * settings.jitterMs);
 }
 
-function classify(error, externalAbort) {
+function classify(error, externalAbort, internalTimeout = false) {
   if (error instanceof ResponseLimitError) {
     return { code: error.code, kind: "response_limit" };
   }
   if (externalAbort) return { code: "REQUEST_ABORTED", kind: "aborted" };
+  if (internalTimeout) {
+    return { code: "DEADLINE_EXCEEDED", kind: "timeout" };
+  }
   const raw = typeof error?.code === "string" ? error.code : "";
   const code = /^[A-Z0-9_]{1,80}$/.test(raw) ? raw : "REQUEST_FAILED";
   if (code.includes("TIMEOUT") || error?.name === "TimeoutError") {
     return { code: code === "REQUEST_FAILED" ? "REQUEST_TIMEOUT" : code, kind: "timeout" };
   }
-  if (code === "UND_ERR_ABORTED") return { code, kind: "aborted" };
+  if (code === "UND_ERR_ABORTED") return { code, kind: "transport" };
   return { code, kind: "transport" };
 }
 
@@ -556,6 +668,7 @@ function failed(code, kind, context) {
     requestId: context.requestId,
     targetUrl: context.targetUrl,
     error: { code, kind },
+    connectionMode: context.settings.connectionMode,
     estimatedCostPerAttempt: context.settings.estimatedCostPerAttempt,
     costCurrency: context.settings.costCurrency,
   });
@@ -617,6 +730,18 @@ function optionalNumber(value, min, max) {
 function currency(value) {
   if (value == null || String(value).trim() === "") return null;
   return String(value).trim().toUpperCase();
+}
+
+function connectionMode(value) {
+  if (value == null || String(value).trim() === "") return "pooled";
+  const normalized = String(value).trim().toLowerCase();
+  if (!CONNECTION_MODES.has(normalized)) {
+    throw new ProxyConfigError(
+      "B2B_CONNECTION_MODE must be pooled or fresh_tunnel",
+      "INVALID_CONNECTION_MODE",
+    );
+  }
+  return normalized;
 }
 
 function defaultSleep(delayMs, signal) {

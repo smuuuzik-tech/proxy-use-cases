@@ -61,6 +61,20 @@ function parseOptionalFieldPath(value, name) {
   return value;
 }
 
+function parseConnectionMode(value) {
+  const normalized =
+    value == null || value === ""
+      ? "pooled"
+      : String(value).trim().toLowerCase();
+  if (!["pooled", "fresh_tunnel"].includes(normalized)) {
+    throw new AcceptanceConfigError(
+      "http.connection_mode must be pooled or fresh_tunnel",
+      "INVALID_CONNECTION_MODE",
+    );
+  }
+  return normalized;
+}
+
 
 export async function loadPrivateAcceptanceConfig(configPath) {
   const absolute = path.resolve(configPath);
@@ -122,6 +136,7 @@ export async function loadPrivateAcceptanceConfig(configPath) {
     }),
     http: Object.freeze({
       targetUrl: requiredString(source.http.target_url, "http.target_url"),
+      connectionMode: parseConnectionMode(source.http.connection_mode),
       requestId:
         source.http.request_id || "local-proxy-acceptance",
       bodyAssertion: parseBodyAssertion(source.http.body_assertion),
@@ -256,6 +271,7 @@ export function buildAcceptanceSummary({
     passed: httpPassed && browserPassed,
     http: {
       passed: httpPassed,
+      connection_mode: httpResult.connectionMode,
       body_assertion: bodyAssertion,
       execution: httpResult.execution,
     },

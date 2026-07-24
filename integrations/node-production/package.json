@@ -1,7 +1,7 @@
 {
   "name": "andrey-proxy-sdk-node",
-  "version": "0.3.0",
-  "description": "Provider-neutral Node.js proxy SDK with bounded HTTP requests and an optional policy-gated browser route with durable replay.",
+  "version": "0.4.0",
+  "description": "Provider-neutral Node.js proxy SDK with bounded HTTP requests, explicit connection strategies, safe rotation diagnostics, and an optional policy-gated browser route.",
   "type": "module",
   "main": "./src/client.js",
   "types": "./src/client.d.ts",
@@ -13,11 +13,16 @@
     "./browser": {
       "types": "./src/browser.d.ts",
       "import": "./src/browser.js"
+    },
+    "./rotation": {
+      "types": "./src/rotation.d.ts",
+      "import": "./src/rotation.js"
     }
   },
   "bin": {
     "andrey-proxy-node": "./src/cli.js",
-    "andrey-proxy-browser": "./src/browser-cli.js"
+    "andrey-proxy-browser": "./src/browser-cli.js",
+    "andrey-proxy-rotation": "./src/rotation-cli.js"
   },
   "files": [
     "src",
@@ -28,9 +33,9 @@
     "acceptance.example.json"
   ],
   "scripts": {
-    "check": "node --check src/client.js && node --check src/execution.js && node --check src/job-store.js && node --check src/browser.js && node --check src/acceptance.js && node --check src/browser-cli.js && node --check scripts/local-acceptance.mjs && node --check src/cli.js",
+    "check": "node --check src/client.js && node --check src/execution.js && node --check src/job-store.js && node --check src/browser.js && node --check src/acceptance.js && node --check src/browser-cli.js && node --check src/rotation.js && node --check src/rotation-cli.js && node --check scripts/local-acceptance.mjs && node --check src/cli.js",
     "test": "node --test",
-    "smoke:cli": "node src/browser-cli.js --help && node scripts/local-acceptance.mjs --help",
+    "smoke:cli": "node src/browser-cli.js --help && node src/rotation-cli.js --help && node scripts/local-acceptance.mjs --help",
     "acceptance:local": "node scripts/local-acceptance.mjs",
     "pack:check": "npm pack --dry-run"
   },
@@ -52,6 +57,8 @@
     "proxy",
     "http",
     "https",
+    "connection-strategy",
+    "rotation-diagnostic",
     "undici",
     "playwright",
     "browser",

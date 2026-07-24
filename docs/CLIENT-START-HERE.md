@@ -74,6 +74,10 @@ Node.js-клиент использует явный Undici `ProxyAgent`, отк
 query или исходный transport error. Формат `result.execution` совпадает с
 Python SDK.
 
+Если exit IP зависит от lifetime соединения, сначала запустите
+[безопасную диагностику ротации](CONNECTION-STRATEGIES-AND-ROTATION.md). Она
+сравнит `pooled` и `fresh_tunnel`, но не выведет наблюдаемые IP.
+
 ## Если HTTP недостаточно
 
 Node.js SDK содержит отдельный
@@ -98,6 +102,8 @@ offline replay с проверкой SHA-256.
 ## Если нужно выбрать схему
 
 - Sticky или rotating: [Session Strategy Analyzer](../labs/session-strategy/).
+- Pooling или новый tunnel на независимый запрос:
+  [Connection strategies](CONNECTION-STRATEGIES-AND-ROTATION.md).
 - Сравнение качества и стоимости пулов:
   [Proxybench](../tools/proxybench/).
 - Production Python: [Andrey Proxy SDK](../integrations/python-production/).

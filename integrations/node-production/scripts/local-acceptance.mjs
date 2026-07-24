@@ -53,6 +53,7 @@ try {
     proxyUrl: config.proxy.url,
     proxyUsername: config.proxy.username,
     proxyPassword: config.proxy.password,
+    connectionMode: config.http.connectionMode,
     maxAttempts: 2,
     deadlineMs: 60_000,
     estimatedCostPerAttempt: config.cost.estimatedPerAttempt,

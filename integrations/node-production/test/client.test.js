@@ -51,11 +51,26 @@ test("reads bounded settings from environment", () => {
     B2B_PROXY_URL: "https://proxy.example:8443",
     B2B_PROXY_USERNAME: "account",
     B2B_PROXY_PASSWORD: "secret",
+    B2B_CONNECTION_MODE: "fresh_tunnel",
     B2B_MAX_ATTEMPTS: "4",
     B2B_ALLOW_HTTP_TARGETS: "true",
   });
   assert.equal(value.maxAttempts, 4);
   assert.equal(value.allowHttpTargets, true);
+  assert.equal(value.connectionMode, "fresh_tunnel");
+});
+
+test("rejects an unsupported connection mode", () => {
+  assert.throws(
+    () =>
+      new ProxyClient({
+        ...SETTINGS,
+        connectionMode: "rotate_every_request",
+      }),
+    (error) =>
+      error instanceof ProxyConfigError &&
+      error.code === "INVALID_CONNECTION_MODE",
+  );
 });
 
 test("rejects credentials embedded in proxy URL", () => {
@@ -118,6 +133,130 @@ test("returns body to code while JSON remains redacted", async () => {
   assert.equal(result.execution.quality.outcome, "success");
   assert.equal(result.execution.route.selected, "http_proxy");
   assert.equal(result.execution.route.automatic_escalation, false);
+  assert.equal(result.connectionMode, "pooled");
+  assert.equal(result.toJSON().connection_mode, "pooled");
+});
+
+test("fresh_tunnel creates and closes one dispatcher per attempt", async () => {
+  const created = [];
+  const used = [];
+  let calls = 0;
+  const client = new ProxyClient(
+    {
+      ...SETTINGS,
+      connectionMode: "fresh_tunnel",
+      maxAttempts: 2,
+    },
+    {
+      dispatcherFactory: () => {
+        const dispatcher = {
+          closed: 0,
+          async close() {
+            this.closed += 1;
+          },
+        };
+        created.push(dispatcher);
+        return dispatcher;
+      },
+      requestFn: async (_url, options) => {
+        used.push(options.dispatcher);
+        calls += 1;
+        return calls === 1 ? response(503) : response(200);
+      },
+      sleep: async () => {},
+      random: () => 0,
+    },
+  );
+
+  const result = await client.get("https://service.example/health");
+  await client.close();
+
+  assert.equal(result.ok, true);
+  assert.equal(result.attempts, 2);
+  assert.equal(result.connectionMode, "fresh_tunnel");
+  assert.equal(created.length, 2);
+  assert.deepEqual(used, created);
+  assert.deepEqual(created.map((dispatcher) => dispatcher.closed), [1, 1]);
+});
+
+test("fresh_tunnel closes the dispatcher after a transport error", async () => {
+  let closes = 0;
+  let calls = 0;
+  const client = new ProxyClient(
+    {
+      ...SETTINGS,
+      connectionMode: "fresh_tunnel",
+      maxAttempts: 2,
+    },
+    {
+      dispatcherFactory: () => ({
+        async close() {
+          closes += 1;
+        },
+      }),
+      requestFn: async () => {
+        calls += 1;
+        if (calls === 1) {
+          const error = new Error("private proxy detail");
+          error.code = "UND_ERR_SOCKET";
+          throw error;
+        }
+        return response(200);
+      },
+      sleep: async () => {},
+      random: () => 0,
+    },
+  );
+
+  const result = await client.get("https://service.example/health");
+
+  assert.equal(result.ok, true);
+  assert.equal(result.attempts, 2);
+  assert.equal(closes, 2);
+});
+
+test("fresh_tunnel reports dispatcher cleanup failure without raw error", async () => {
+  let destroyed = 0;
+  const client = new ProxyClient(
+    {
+      ...SETTINGS,
+      connectionMode: "fresh_tunnel",
+    },
+    {
+      dispatcherFactory: () => ({
+        async close() {
+          throw new Error("private cleanup detail");
+        },
+        async destroy() {
+          destroyed += 1;
+        },
+      }),
+      requestFn: async () => response(200),
+    },
+  );
+
+  const result = await client.get("https://service.example/health");
+
+  assert.deepEqual(result.error, {
+    code: "DISPATCHER_CLOSE_FAILED",
+    kind: "transport",
+  });
+  assert.equal(destroyed, 1);
+  assert.doesNotMatch(JSON.stringify(result), /private cleanup/);
+});
+
+test("fresh_tunnel rejects an injected shared dispatcher", () => {
+  assert.throws(
+    () =>
+      new ProxyClient(
+        {
+          ...SETTINGS,
+          connectionMode: "fresh_tunnel",
+        },
+        { dispatcher: { close: async () => {} } },
+      ),
+    (error) => error.code === "INCOMPATIBLE_DISPATCHER",
+  );
 });
 
 test("retries retryable status for GET", async () => {
@@ -225,6 +364,25 @@ test("returns stable error without leaking message", async () => {
     kind: "timeout",
   });
   assert.doesNotMatch(JSON.stringify(result), /user|secret|proxy\.example/);
+});
+
+test("retries an undici abort not caused by caller or deadline", async () => {
+  let calls = 0;
+  const client = mocked(async () => {
+    calls += 1;
+    if (calls === 1) {
+      const error = new Error("private undici abort");
+      error.code = "UND_ERR_ABORTED";
+      throw error;
+    }
+    return response(200);
+  });
+
+  const result = await client.get("https://service.example/health");
+
+  assert.equal(result.ok, true);
+  assert.equal(result.attempts, 2);
+  assert.equal(calls, 2);
 });
 
 test("returns a stable result when an external abort interrupts backoff", async () => {
