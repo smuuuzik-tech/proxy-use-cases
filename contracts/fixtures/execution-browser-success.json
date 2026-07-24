@@ -1,12 +1,11 @@
 {
   "schema_version": "1.1",
   "route": {
-    "selected": "http_proxy",
-    "reason": "configured_http_proxy",
+    "selected": "browser",
+    "reason": "manual_browser_approval",
     "next_action": "complete",
     "automatic_escalation": false,
     "manual_candidates": [
-      "browser",
       "managed_unblocker",
       "ai_extraction"
     ]
@@ -15,9 +14,9 @@
     "outcome": "success",
     "attempts": 1,
     "retries": 0,
-    "elapsed_ms": 184,
+    "elapsed_ms": 925,
     "status_code": 200,
-    "response_bytes": 17
+    "response_bytes": null
   },
   "cost": {
     "basis": "not_configured",

@@ -69,7 +69,7 @@ def test_personal_sdk_facade_starts_from_environment_and_supports_get():
         )
 
     assert result.ok is True
-    assert seen[0].headers["user-agent"] == "andrey-proxy-sdk/0.2.0"
+    assert seen[0].headers["user-agent"] == "andrey-proxy-sdk/0.3.0"
     assert result.to_dict()["url"].endswith("?<redacted-query>")
     assert "private-password" not in str(result.to_dict())
 

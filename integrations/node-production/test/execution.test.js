@@ -39,6 +39,19 @@ test("timeout contract matches the cross-language fixture", () => {
   assert.deepEqual(contract, fixture("execution-timeout.json"));
 });
 
+test("browser contract matches the cross-language fixture", () => {
+  const contract = buildExecutionContract({
+    ok: true,
+    attempts: 1,
+    elapsedMs: 925,
+    statusCode: 200,
+    selectedRoute: "browser",
+    routeReason: "manual_browser_approval",
+  });
+
+  assert.deepEqual(contract, fixture("execution-browser-success.json"));
+});
+
 test("HTTP outcomes produce stable next actions", () => {
   const auth = buildExecutionContract({
     ok: false,

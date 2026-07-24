@@ -139,7 +139,7 @@ proxy-b2b https://service.example/resources/42 \
   "attempts": 1,
   "elapsed_ms": 184,
   "execution": {
-    "schema_version": "1.0",
+    "schema_version": "1.1",
     "route": {
       "selected": "http_proxy",
       "reason": "configured_http_proxy",

@@ -38,6 +38,19 @@ def test_timeout_contract_matches_cross_language_fixture():
     assert contract.to_dict() == fixture("execution-timeout.json")
 
 
+def test_browser_contract_matches_cross_language_fixture():
+    contract = build_execution_contract(
+        ok=True,
+        attempts=1,
+        elapsed_ms=925,
+        status_code=200,
+        selected_route="browser",
+        route_reason="manual_browser_approval",
+    )
+
+    assert contract.to_dict() == fixture("execution-browser-success.json")
+
+
 def test_http_outcomes_produce_stable_next_actions():
     auth = build_execution_contract(
         ok=False,

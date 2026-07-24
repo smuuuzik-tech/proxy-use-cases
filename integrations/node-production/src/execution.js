@@ -1,10 +1,13 @@
-export const EXECUTION_SCHEMA_VERSION = "1.0";
+export const EXECUTION_SCHEMA_VERSION = "1.1";
 
-const MANUAL_CANDIDATES = Object.freeze([
-  "browser",
-  "managed_unblocker",
-  "ai_extraction",
-]);
+const MANUAL_CANDIDATES = Object.freeze({
+  http_proxy: Object.freeze([
+    "browser",
+    "managed_unblocker",
+    "ai_extraction",
+  ]),
+  browser: Object.freeze(["managed_unblocker", "ai_extraction"]),
+});
 
 function executionOutcome({ ok, statusCode, errorKind }) {
   if (ok) return "success";
@@ -41,6 +44,8 @@ export function buildExecutionContract({
   errorKind = null,
   estimatedCostPerAttempt = null,
   costCurrency = null,
+  selectedRoute = "http_proxy",
+  routeReason = "configured_http_proxy",
 }) {
   const outcome = executionOutcome({ ok, statusCode, errorKind });
   const cost = estimatedCostPerAttempt == null
@@ -60,11 +65,11 @@ export function buildExecutionContract({
   return {
     schema_version: EXECUTION_SCHEMA_VERSION,
     route: {
-      selected: "http_proxy",
-      reason: "configured_http_proxy",
+      selected: selectedRoute,
+      reason: routeReason,
       next_action: nextAction(outcome, statusCode),
       automatic_escalation: false,
-      manual_candidates: [...MANUAL_CANDIDATES],
+      manual_candidates: [...(MANUAL_CANDIDATES[selectedRoute] || [])],
     },
     quality: {
       outcome,

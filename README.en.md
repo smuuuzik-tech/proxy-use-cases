@@ -22,7 +22,7 @@ diagnostic path. Use [Choose a solution](docs/CHOOSE-A-SOLUTION.md) for a
 |---|---|---|
 | 1. Connectivity | Verify routing, authentication, and observed egress IP | [cURL quickstart](quickstarts/curl/) |
 | 2. Integration | Integrate proxies in Python with timeouts, a retry budget, and a stable result contract | [Andrey Proxy SDK](integrations/python-production/) |
-| 2. Integration | Integrate proxies in Node.js with an explicit Undici ProxyAgent and bounded retries | [Andrey Proxy Client for Node.js](integrations/node-production/) |
+| 2/3. Integration | Integrate proxies in Node.js and optionally run a manually approved browser route with durable replay | [Andrey Proxy Client for Node.js](integrations/node-production/) |
 | 3. Operations | Measure success rate, p95 latency, retry amplification, errors, and pool health | [Proxy Healthcheck](tools/proxy-healthcheck/) |
 | 3. Decision | Compare pools using the same SLO and cost-per-success policy | [Proxybench](tools/proxybench/) |
 | 3/4. Business workflow | Test an authorized site from an agreed region and retain evidence | [Regional Web QA](use-cases/regional-web-qa/) |
@@ -34,6 +34,7 @@ diagnostic path. Use [Choose a solution](docs/CHOOSE-A-SOLUTION.md) for a
 | `407`, DNS, TLS, timeout, `403`, `429`, or a broken connection | [Proxy Diagnostics](tools/proxy-diagnostics/) |
 | Choose sticky sessions or rotation using workload observations | [Session Strategy Analyzer](labs/session-strategy/) |
 | Choose between two or more pools using measured evidence | [Proxybench](tools/proxybench/) |
+| HTTP is insufficient for an authorized browser check | [Policy-gated Browser Route](docs/BROWSER-ROUTE-AND-REPLAY.md) |
 | Isolate a provider's public API behind a defensive client | [Vendor-specific API client](integrations/proxy-market-api/) |
 
 All nine solutions include offline tests and require no real credentials for
@@ -48,6 +49,8 @@ quality, safe next action, and optional estimated cost.
 - [Maturity model](docs/B2B-MATURITY-MODEL.md)
 - [Reference architecture](docs/B2B-REFERENCE-ARCHITECTURE.md)
 - [Execution contract](docs/EXECUTION-CONTRACT.md)
+- [Policy-gated browser route and replay](docs/BROWSER-ROUTE-AND-REPLAY.md)
+- [Local real-proxy acceptance](docs/LOCAL-REAL-PROXY-ACCEPTANCE.md)
 - [SLO and incident runbook template](docs/B2B-SLO-AND-RUNBOOK.md)
 - [Optional provider API adapter](integrations/proxy-market-api/) — an example
   of isolating a specific provider contract from the core system.

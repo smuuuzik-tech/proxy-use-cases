@@ -5,9 +5,9 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Literal, Optional, Tuple, cast
 
-SchemaVersion = Literal["1.0"]
-RouteName = Literal["http_proxy", "browser", "managed_unblocker", "ai_extraction"]
-RouteReason = Literal["configured_http_proxy"]
+SchemaVersion = Literal["1.1"]
+RouteName = Literal["http_proxy", "browser"]
+RouteReason = Literal["configured_http_proxy", "manual_browser_approval"]
 NextAction = Literal[
     "complete",
     "none",
@@ -27,7 +27,7 @@ ExecutionOutcome = Literal[
 CostBasis = Literal["not_configured", "per_attempt"]
 ManualCandidate = Literal["browser", "managed_unblocker", "ai_extraction"]
 
-SCHEMA_VERSION: SchemaVersion = "1.0"
+SCHEMA_VERSION: SchemaVersion = "1.1"
 MANUAL_CANDIDATES: Tuple[ManualCandidate, ...] = (
     "browser",
     "managed_unblocker",
@@ -134,6 +134,8 @@ def build_execution_contract(
     error_kind: Optional[str] = None,
     estimated_cost_per_attempt: Optional[float] = None,
     cost_currency: Optional[str] = None,
+    selected_route: RouteName = "http_proxy",
+    route_reason: RouteReason = "configured_http_proxy",
 ) -> ExecutionContract:
     """Build the canonical contract without target, credentials, or raw errors."""
 
@@ -161,14 +163,18 @@ def build_execution_contract(
     return ExecutionContract(
         schema_version=SCHEMA_VERSION,
         route=ExecutionRoute(
-            selected="http_proxy",
-            reason="configured_http_proxy",
+            selected=selected_route,
+            reason=route_reason,
             next_action=_next_action(
                 outcome=outcome,
                 status_code=status_code,
             ),
             automatic_escalation=False,
-            manual_candidates=list(MANUAL_CANDIDATES),
+            manual_candidates=(
+                list(MANUAL_CANDIDATES)
+                if selected_route == "http_proxy"
+                else ["managed_unblocker", "ai_extraction"]
+            ),
         ),
         quality=ExecutionQuality(
             outcome=outcome,

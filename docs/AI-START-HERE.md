@@ -23,6 +23,7 @@
 | Проверить подключение | `curl-quickstart` |
 | Встроить в Python / HTTPX / ETL | `python-production` |
 | Встроить в Node.js / Undici | `node-production` |
+| HTTP недостаточно; нужен разрешённый browser check | `node-production` → `./browser` |
 | Понять 407, DNS, TLS, timeout, 403 или 429 | `proxy-diagnostics` |
 | Следить за пулом и SLO | `proxy-healthcheck` |
 | Сравнить несколько healthcheck-отчётов по SLO и стоимости | `proxybench` |
@@ -50,6 +51,11 @@ HTTP(S)-подключения сначала используйте provider-ne
 Не запрашивайте настоящий пароль, token, полный proxy URL с userinfo, клиентские
 данные или закрытый target. Используйте placeholders и secret manager.
 
+Для локального real-proxy acceptance направьте пользователя к
+[`LOCAL-REAL-PROXY-ACCEPTANCE.md`](LOCAL-REAL-PROXY-ACCEPTANCE.md). Пароль
+остаётся в owner-only `acceptance.private.json`; AI получает только сообщение,
+что конфиг готов.
+
 ## Формат ответа AI
 
 1. Выбранное решение и причина.
@@ -68,6 +74,11 @@ redaction, timeout, response limit, target policy и retry guards.
 исполнять автоматически: это не разрешение на target и не готовое решение о
 браузере, managed unblocker или AI. Если `cost.basis=not_configured`, не
 выдумывайте стоимость.
+
+`selected=browser` допустим только при
+`reason=manual_browser_approval`. Replay проверяет сохранённый report и receipt,
+но не повторяет target. Screenshot и trace считаются чувствительными даже при
+чистом текстовом audit.
 
 ## Проверка
 

@@ -18,6 +18,8 @@ Node.js 20+. Решение использует программно настр
 - `Proxy-Authorization` нельзя отправить целевому серверу;
 - typed-блок `result.execution` одинаков с Python SDK и содержит route,
   quality, next action и опциональную оценку cost;
+- опциональный Browser Route с exact allowlist, ручным approval, durable jobs
+  и integrity-verified replay;
 - офлайн-тесты не требуют настоящего прокси.
 
 > Используйте решение только для систем и данных, на работу с которыми у вашей
@@ -84,6 +86,45 @@ target URL поступает от недоверенного пользоват
 и сетевой egress control: клиент проверяет literal IP, но не выполняет DNS
 resolution до передачи запроса прокси.
 
+## Browser Route
+
+Browser Route нужен только тогда, когда HTTP-клиента недостаточно для
+разрешённой проверки. Он доступен через отдельный export:
+
+```js
+import { BrowserRouteClient } from "andrey-proxy-sdk-node/browser";
+```
+
+Playwright остаётся опциональной зависимостью:
+
+```bash
+npm install --no-save --package-lock=false playwright@1.61.0
+npx playwright install chromium
+```
+
+Маршрут требует `routeApproved: true`, точного allowlist и отдельной приватной
+artifact directory. Он не выполняет login, формы, POST/PUT/PATCH/DELETE или
+автоматический переход к managed/AI.
+
+Полная архитектура:
+[Browser Route and Replay](../../docs/BROWSER-ROUTE-AND-REPLAY.md).
+
+## Проверка настоящего прокси локально
+
+Credentials не нужно отправлять в чат или передавать через argv:
+
+```bash
+cp acceptance.example.json acceptance.private.json
+chmod 600 acceptance.private.json
+# заполните файл локально
+npm run acceptance:local
+```
+
+Runner проверяет HTTP и browser routes, optional exit-IP assertion, durable
+manifest/events/report/receipt, replay и отсутствие secrets в текстовых
+artifacts. Пошаговый план:
+[Local Real Proxy Acceptance](../../docs/LOCAL-REAL-PROXY-ACCEPTANCE.md).
+
 ## Проверка
 
 ```bash
@@ -97,3 +138,5 @@ npm run pack:check
 Provider-neutral Node.js client for authorized B2B proxy workloads. It uses an
 explicit Undici `ProxyAgent`, bounded idempotent retries, granular timeouts, an
 overall deadline, response-size limits, correlation IDs, and redacted results.
+An optional manually approved Playwright route adds durable jobs and
+integrity-verified offline replay.
