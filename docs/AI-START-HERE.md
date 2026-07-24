@@ -9,7 +9,9 @@
 1. [`catalog.json`](../catalog.json) — канонический машиночитаемый каталог.
 2. README выбранного решения — точная установка и интерфейс.
 3. Тесты выбранного решения — исполняемый контракт.
-4. [`SECURITY.md`](../SECURITY.md) — безопасная работа с уязвимостями.
+4. [`proxy-execution.schema.json`](../contracts/proxy-execution.schema.json) —
+   общий результат Python и Node.js.
+5. [`SECURITY.md`](../SECURITY.md) — безопасная работа с уязвимостями.
 
 `llms.txt` — короткая карта для обнаружения. При расхождении используйте
 `catalog.json` и сообщите о несоответствии.
@@ -61,10 +63,17 @@ HTTP(S)-подключения сначала используйте provider-ne
 Не копируйте внутренности SDK, если их можно импортировать. Не отключайте
 redaction, timeout, response limit, target policy и retry guards.
 
+Для результатов Python/Node.js сначала читайте `execution.schema_version`, затем
+`quality.outcome` и `route.next_action`. Поле `manual_candidates` нельзя
+исполнять автоматически: это не разрешение на target и не готовое решение о
+браузере, managed unblocker или AI. Если `cost.basis=not_configured`, не
+выдумывайте стоимость.
+
 ## Проверка
 
 ```bash
 node scripts/validate_catalog.mjs
+node scripts/validate_execution_contract.mjs
 node scripts/validate_markdown_links.mjs
 ```
 

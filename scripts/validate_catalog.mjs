@@ -6,6 +6,7 @@ const catalog = JSON.parse(readFileSync(resolve(root, "catalog.json"), "utf8"));
 const errors = [];
 const ids = new Set();
 const paths = new Set();
+const contractIds = new Set();
 const categories = new Set([
   "quickstart",
   "sdk",
@@ -20,6 +21,9 @@ if (catalog.$schema !== "./catalog.schema.json") {
 }
 if (!Array.isArray(catalog.solutions) || !catalog.solutions.length) {
   errors.push("catalog.solutions must be a non-empty array");
+}
+if (!Array.isArray(catalog.contracts) || !catalog.contracts.length) {
+  errors.push("catalog.contracts must be a non-empty array");
 }
 
 for (const [index, solution] of (catalog.solutions || []).entries()) {
@@ -72,8 +76,40 @@ for (const [index, solution] of (catalog.solutions || []).entries()) {
   }
 }
 
+for (const [index, contract] of (catalog.contracts || []).entries()) {
+  const prefix = `contracts[${index}]`;
+  for (const field of ["id", "schema_version", "path"]) {
+    if (typeof contract[field] !== "string" || !contract[field].trim()) {
+      errors.push(`${prefix}.${field} must be a non-empty string`);
+    }
+  }
+  for (const field of ["applies_to", "fixtures"]) {
+    if (!Array.isArray(contract[field]) || !contract[field].length) {
+      errors.push(`${prefix}.${field} must be a non-empty array`);
+    }
+  }
+  if (contractIds.has(contract.id)) {
+    errors.push(`duplicate contract id: ${contract.id}`);
+  }
+  contractIds.add(contract.id);
+
+  for (const path of [contract.path, ...(contract.fixtures || [])]) {
+    const target = resolve(root, path || "__missing__");
+    if (!existsSync(target) || !statSync(target).isFile()) {
+      errors.push(`${prefix} path does not resolve to a file: ${path}`);
+    }
+  }
+  for (const solutionId of contract.applies_to || []) {
+    if (!ids.has(solutionId)) {
+      errors.push(`${prefix}.applies_to references unknown solution: ${solutionId}`);
+    }
+  }
+}
+
 if (errors.length) {
   process.stderr.write(`${errors.map((error) => `- ${error}`).join("\n")}\n`);
   process.exit(1);
 }
-process.stdout.write(`Catalog OK: ${ids.size} solutions.\n`);
+process.stdout.write(
+  `Catalog OK: ${ids.size} solutions, ${contractIds.size} contract.\n`,
+);

@@ -43,11 +43,18 @@ DevOps/SRE и команд, которым нужен воспроизводим
 Все девять решений имеют офлайн-тесты и не требуют настоящих credentials для
 проверки кода.
 
+Python и Node.js SDK возвращают одинаковый версионированный
+[`execution`-контракт](docs/EXECUTION-CONTRACT.md): выполненный маршрут, причина
+решения, attempts/retries, нормализованное качество, безопасное следующее
+действие и опциональная оценка стоимости.
+
 ## B2B-контур
 
 - [Модель зрелости](docs/B2B-MATURITY-MODEL.md) — какой уровень нужен компании.
 - [Референсная архитектура](docs/B2B-REFERENCE-ARCHITECTURE.md) — границы policy,
   клиента, прокси-пула и наблюдаемости.
+- [Execution Contract](docs/EXECUTION-CONTRACT.md) — единый typed-результат
+  Python/Node.js для приложений, мониторинга и AI.
 - [Шаблон SLO и runbook](docs/B2B-SLO-AND-RUNBOOK.md) — метрики, состояния и
   порядок действий при инциденте.
 - [Опциональный API-адаптер](integrations/proxy-market-api/) — пример того,

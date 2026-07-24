@@ -115,6 +115,9 @@ test("returns body to code while JSON remains redacted", async () => {
   assert.equal(calls[0].options.maxRedirections, 0);
   assert.equal(calls[0].options.headers["x-request-id"], "inventory-001");
   assert.doesNotMatch(JSON.stringify(result), /private|token|secret|items/);
+  assert.equal(result.execution.quality.outcome, "success");
+  assert.equal(result.execution.route.selected, "http_proxy");
+  assert.equal(result.execution.route.automatic_escalation, false);
 });
 
 test("retries retryable status for GET", async () => {
@@ -126,6 +129,50 @@ test("retries retryable status for GET", async () => {
   const result = await client.get("https://service.example/health");
   assert.equal(result.ok, true);
   assert.equal(result.attempts, 2);
+});
+
+test("estimates configured attempt cost after retries", async () => {
+  let calls = 0;
+  const client = mocked(
+    async () => {
+      calls += 1;
+      return calls === 1 ? response(503) : response(200);
+    },
+    {
+      estimatedCostPerAttempt: 0.002,
+      costCurrency: "USD",
+    },
+  );
+
+  const result = await client.get("https://service.example/health");
+
+  assert.deepEqual(result.execution.cost, {
+    basis: "per_attempt",
+    currency: "USD",
+    unit_cost: 0.002,
+    estimated_total: 0.004,
+  });
+});
+
+test("cost configuration is optional but must be complete", () => {
+  const configured = settingsFromEnv({
+    B2B_PROXY_URL: "https://proxy.example:8443",
+    B2B_ESTIMATED_COST_PER_ATTEMPT: "0.0025",
+    B2B_COST_CURRENCY: "usd",
+  });
+  assert.equal(configured.estimatedCostPerAttempt, 0.0025);
+  assert.equal(configured.costCurrency, "USD");
+
+  assert.throws(
+    () =>
+      new ProxyClient({
+        ...SETTINGS,
+        estimatedCostPerAttempt: 0.1,
+      }),
+    (error) =>
+      error instanceof ProxyConfigError &&
+      error.code === "INVALID_COST_CONFIGURATION",
+  );
 });
 
 test("does not retry POST", async () => {

@@ -1,6 +1,6 @@
 {
   "name": "andrey-proxy-sdk-node",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Provider-neutral Node.js proxy client with bounded retries, timeouts, response limits, and redacted results.",
   "type": "module",
   "main": "./src/client.js",
@@ -20,7 +20,7 @@
     ".env.example"
   ],
   "scripts": {
-    "check": "node --check src/client.js && node --check src/cli.js",
+    "check": "node --check src/client.js && node --check src/execution.js && node --check src/cli.js",
     "test": "node --test",
     "pack:check": "npm pack --dry-run"
   },

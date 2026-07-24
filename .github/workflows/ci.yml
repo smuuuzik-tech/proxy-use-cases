@@ -23,6 +23,8 @@ jobs:
           node-version: "20"
       - name: Validate machine-readable catalog
         run: node scripts/validate_catalog.mjs
+      - name: Validate cross-language execution contract
+        run: node scripts/validate_execution_contract.mjs
       - name: Validate relative Markdown links
         run: node scripts/validate_markdown_links.mjs
 

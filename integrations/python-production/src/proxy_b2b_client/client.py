@@ -16,6 +16,7 @@ from urllib.parse import urlsplit
 import httpx
 
 from .config import ClientSettings, ConfigError
+from .execution import ExecutionContract, build_execution_contract
 from .redaction import redact_url
 
 
@@ -45,6 +46,27 @@ class RequestResult:
     error_code: Optional[str] = None
     message: Optional[str] = None
     response: Optional[httpx.Response] = field(default=None, repr=False)
+    execution_error_kind: Optional[str] = field(default=None, repr=False)
+    estimated_cost_per_attempt: Optional[float] = field(default=None, repr=False)
+    cost_currency: Optional[str] = field(default=None, repr=False)
+
+    @property
+    def execution(self) -> ExecutionContract:
+        return build_execution_contract(
+            ok=self.ok,
+            attempts=self.attempts,
+            elapsed_ms=self.elapsed_ms,
+            status_code=self.status_code,
+            response_bytes=(
+                len(self.response.content)
+                if self.response is not None
+                else None
+            ),
+            error_code=self.error_code,
+            error_kind=self.execution_error_kind,
+            estimated_cost_per_attempt=self.estimated_cost_per_attempt,
+            cost_currency=self.cost_currency,
+        )
 
     def to_dict(self) -> Dict[str, Any]:
         payload: Dict[str, Any] = {
@@ -56,6 +78,7 @@ class RequestResult:
             "attempts": self.attempts,
             "retries": max(0, self.attempts - 1),
             "elapsed_ms": self.elapsed_ms,
+            "execution": self.execution.to_dict(),
         }
         if self.response is not None:
             payload["response"] = {
@@ -172,7 +195,7 @@ class B2BHttpClient:
             "limits": limits,
             "follow_redirects": settings.follow_redirects,
             "trust_env": False,
-            "headers": {"User-Agent": "andrey-proxy-sdk/0.1.0"},
+            "headers": {"User-Agent": "andrey-proxy-sdk/0.2.0"},
         }
         if transport is None:
             kwargs["proxy"] = settings.authenticated_proxy_url
@@ -217,6 +240,13 @@ class B2BHttpClient:
         exponential = self.settings.backoff_base * (2 ** (failed_attempt - 1))
         bounded = min(self.settings.backoff_max, exponential)
         return bounded + self._jitter(0.0, self.settings.backoff_jitter)
+
+    def _result(self, **values: Any) -> RequestResult:
+        return RequestResult(
+            estimated_cost_per_attempt=self.settings.estimated_cost_per_attempt,
+            cost_currency=self.settings.cost_currency,
+            **values,
+        )
 
     def request(
         self,
@@ -272,7 +302,7 @@ class B2BHttpClient:
         for attempt in range(1, attempt_limit + 1):
             elapsed = time.monotonic() - started
             if elapsed >= self.settings.total_deadline:
-                return RequestResult(
+                return self._result(
                     ok=False,
                     request_id=correlation_id,
                     method=method,
@@ -308,7 +338,7 @@ class B2BHttpClient:
                         and retry_after > self.settings.retry_after_max
                     ):
                         response.close()
-                        return RequestResult(
+                        return self._result(
                             ok=False,
                             request_id=correlation_id,
                             method=method,
@@ -324,7 +354,7 @@ class B2BHttpClient:
                     if retry_after is not None:
                         delay = max(delay, retry_after)
                     if time.monotonic() - started + delay >= self.settings.total_deadline:
-                        return RequestResult(
+                        return self._result(
                             ok=False,
                             request_id=correlation_id,
                             method=method,
@@ -356,7 +386,7 @@ class B2BHttpClient:
                     extensions=response.extensions,
                 )
             except ResponseTooLarge:
-                return RequestResult(
+                return self._result(
                     ok=False,
                     request_id=correlation_id,
                     method=method,
@@ -367,7 +397,7 @@ class B2BHttpClient:
                     message="Response body exceeded the configured size limit.",
                 )
             except DeadlineExceeded:
-                return RequestResult(
+                return self._result(
                     ok=False,
                     request_id=correlation_id,
                     method=method,
@@ -381,7 +411,7 @@ class B2BHttpClient:
                 if retry_allowed and attempt < attempt_limit:
                     delay = self._delay_for_retry(attempt)
                     if time.monotonic() - started + delay >= self.settings.total_deadline:
-                        return RequestResult(
+                        return self._result(
                             ok=False,
                             request_id=correlation_id,
                             method=method,
@@ -393,7 +423,7 @@ class B2BHttpClient:
                         )
                     self._sleep(delay)
                     continue
-                return RequestResult(
+                return self._result(
                     ok=False,
                     request_id=correlation_id,
                     method=method,
@@ -401,11 +431,16 @@ class B2BHttpClient:
                     attempts=attempt,
                     elapsed_ms=round((time.monotonic() - started) * 1000),
                     error_code="transport_error",
+                    execution_error_kind=(
+                        "timeout"
+                        if isinstance(exc, httpx.TimeoutException)
+                        else "transport_error"
+                    ),
                     message=_transport_message(exc),
                 )
 
             ok = response.is_success
-            return RequestResult(
+            return self._result(
                 ok=ok,
                 request_id=correlation_id,
                 method=method,

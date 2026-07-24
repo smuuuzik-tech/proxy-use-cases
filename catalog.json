@@ -1,6 +1,6 @@
 {
   "$schema": "./catalog.schema.json",
-  "catalog_version": "1.0.0",
+  "catalog_version": "1.1.0",
   "name": "Andrey Malyshev B2B Proxy Toolkit",
   "default_language": "ru",
   "documentation_languages": [
@@ -17,6 +17,21 @@
     "Never place real credentials, client data, or private targets in examples.",
     "Keep proxy credentials separate from proxy and target URLs.",
     "Prefer provider-neutral solutions unless a specific public provider API is required."
+  ],
+  "contracts": [
+    {
+      "id": "proxy-execution",
+      "schema_version": "1.0",
+      "path": "contracts/proxy-execution.schema.json",
+      "applies_to": [
+        "python-production",
+        "node-production"
+      ],
+      "fixtures": [
+        "contracts/fixtures/execution-success.json",
+        "contracts/fixtures/execution-timeout.json"
+      ]
+    }
   ],
   "solutions": [
     {
@@ -71,7 +86,10 @@
         "timeouts",
         "response-limit",
         "correlation-id",
-        "redacted-result"
+        "redacted-result",
+        "execution-contract",
+        "route-decision",
+        "cost-estimate"
       ],
       "keywords": [
         "python",
@@ -106,7 +124,10 @@
         "timeouts",
         "response-limit",
         "correlation-id",
-        "redacted-result"
+        "redacted-result",
+        "execution-contract",
+        "route-decision",
+        "cost-estimate"
       ],
       "keywords": [
         "nodejs",

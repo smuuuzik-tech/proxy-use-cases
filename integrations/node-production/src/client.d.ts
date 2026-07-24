@@ -14,6 +14,8 @@ export interface ProxySettings {
   retryAfterMaxMs?: number;
   allowHttpTargets?: boolean;
   allowPrivateTargets?: boolean;
+  estimatedCostPerAttempt?: number | null;
+  costCurrency?: string | null;
 }
 
 export interface ProxyRequestOptions {
@@ -26,6 +28,47 @@ export interface ProxyRequestOptions {
 
 export class ProxyConfigError extends Error {
   code: string;
+}
+
+export type ExecutionOutcome =
+  | "success"
+  | "http_error"
+  | "transport_error"
+  | "timeout"
+  | "aborted"
+  | "response_limit";
+
+export type ExecutionNextAction =
+  | "complete"
+  | "none"
+  | "review_http_response"
+  | "review_policy_or_credentials"
+  | "review_response_limit"
+  | "review_retry_or_escalation";
+
+export interface ProxyExecutionContract {
+  schema_version: "1.0";
+  route: {
+    selected: "http_proxy" | "browser" | "managed_unblocker" | "ai_extraction";
+    reason: "configured_http_proxy";
+    next_action: ExecutionNextAction;
+    automatic_escalation: false;
+    manual_candidates: Array<"browser" | "managed_unblocker" | "ai_extraction">;
+  };
+  quality: {
+    outcome: ExecutionOutcome;
+    attempts: number;
+    retries: number;
+    elapsed_ms: number;
+    status_code: number | null;
+    response_bytes: number | null;
+  };
+  cost: {
+    basis: "not_configured" | "per_attempt";
+    currency: string | null;
+    unit_cost: number | null;
+    estimated_total: number | null;
+  };
 }
 
 export class ProxyResult {
@@ -43,6 +86,7 @@ export class ProxyResult {
     code: string;
     kind: "aborted" | "response_limit" | "timeout" | "transport";
   } | null;
+  readonly execution: ProxyExecutionContract;
   text(encoding?: string): string;
   json<T = unknown>(): T;
   toJSON(): Record<string, unknown>;
