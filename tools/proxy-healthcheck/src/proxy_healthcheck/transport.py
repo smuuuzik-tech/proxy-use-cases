@@ -76,7 +76,7 @@ class StrictProxyHandler(urllib.request.ProxyHandler):
             req.add_header("Proxy-authorization", f"Basic {credentials}")
         hostport = urllib.parse.unquote(hostport)
         req.set_proxy(hostport, proxy_type)
-        if original_type == proxy_type:
+        if original_type == proxy_type or original_type == "https":
             return None
         return self.parent.open(req, timeout=req.timeout)
 

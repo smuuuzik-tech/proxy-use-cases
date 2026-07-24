@@ -5,7 +5,7 @@ import sys
 import unittest
 import urllib.request
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -81,6 +81,24 @@ class TransportPolicyTests(unittest.TestCase):
 
         self.assertIsNone(result)
         self.assertEqual(request.host, "proxy.internal:8080")
+
+    def test_https_proxy_is_left_for_https_handler_after_proxy_setup(self) -> None:
+        request = urllib.request.Request("https://allowed.example/ip")
+        handler = StrictProxyHandler(
+            {"https": "http://business-user:super-secret@proxy.internal:8080"}
+        )
+        handler.parent = Mock()
+
+        result = handler.proxy_open(
+            request,
+            "http://business-user:super-secret@proxy.internal:8080",
+            "http",
+        )
+
+        self.assertIsNone(result)
+        self.assertEqual(request.host, "proxy.internal:8080")
+        self.assertTrue(request.has_header("Proxy-authorization"))
+        handler.parent.open.assert_not_called()
 
     def test_redirects_are_not_followed(self) -> None:
         handler = NoRedirectHandler()
