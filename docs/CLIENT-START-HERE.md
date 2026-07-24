@@ -75,10 +75,14 @@ query или исходный transport error.
    [Proxy Diagnostics](../tools/proxy-diagnostics/).
 3. Для постоянной эксплуатации подключите
    [Proxy Healthcheck](../tools/proxy-healthcheck/).
+4. Если нужно выбрать между несколькими пулами, сравните одинаковые отчёты через
+   [Proxybench](../tools/proxybench/).
 
 ## Если нужно выбрать схему
 
 - Sticky или rotating: [Session Strategy Analyzer](../labs/session-strategy/).
+- Сравнение качества и стоимости пулов:
+  [Proxybench](../tools/proxybench/).
 - Production Python: [Andrey Proxy SDK](../integrations/python-production/).
 - Production Node.js:
   [Andrey Proxy Client](../integrations/node-production/).

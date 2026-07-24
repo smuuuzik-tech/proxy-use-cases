@@ -3,13 +3,14 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "proxy-healthcheck"
-version = "0.2.0"
-description = "Provider-neutral proxy pool health checks for B2B operations and CI"
+name = "andrey-proxybench"
+version = "0.1.0"
+description = "Provider-neutral comparison of Proxy Healthcheck reports for B2B decisions"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{ name = "Andrey Malyshev" }]
-keywords = ["proxy", "healthcheck", "operations", "observability", "ci"]
+license = { text = "MIT" }
+keywords = ["proxy", "benchmark", "slo", "cost", "b2b"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Environment :: Console",
@@ -21,7 +22,7 @@ classifiers = [
 dependencies = []
 
 [project.scripts]
-proxy-healthcheck = "proxy_healthcheck.cli:main"
+proxybench = "proxybench.cli:main"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
@@ -30,11 +31,4 @@ package-dir = { "" = "src" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-proxy_healthcheck = ["report.schema.json"]
-
-[tool.coverage.run]
-branch = true
-source = ["proxy_healthcheck"]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
+proxybench = ["*.schema.json"]

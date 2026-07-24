@@ -60,6 +60,7 @@ class Report:
     summary: dict[str, Any]
     endpoints: list[dict[str, Any]]
     rotation: dict[str, Any]
+    decision: dict[str, Any]
     config: dict[str, Any]
     results: list[CheckResult]
 
@@ -72,6 +73,7 @@ class Report:
             "summary": self.summary,
             "endpoints": self.endpoints,
             "rotation": self.rotation,
+            "decision": self.decision,
             "config": self.config,
             "results": [result.to_dict() for result in self.results],
         }

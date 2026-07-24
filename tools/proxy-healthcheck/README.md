@@ -12,13 +12,21 @@
 ## Что измеряется
 
 - success rate по каждому endpoint’у и по всему запуску;
-- min / average / p95 / max latency успешных проверок;
+- min / average / p50 / p95 / max latency успешных проверок;
 - число уникальных внешних IP и частота их повторного использования;
 - изменения IP в последовательности запросов;
-- количество фактических попыток с учётом retry budget;
+- количество фактических попыток, retry amplification и число восстановлений
+  после повтора;
 - стабильная категория ошибки (`proxy_auth`, `dns`, `connect`, `tls`,
   `timeout`, `target_http`, `policy_redirect`, `application_response`);
-- причины деградации без попадания логина и пароля прокси в отчёт.
+- разбивка ошибок по категориям;
+- явные gates, observed value, operator, threshold и причины решения без
+  попадания логина и пароля прокси в отчёт.
+
+Формат отчёта версии `1.1` описан в
+[`report.schema.json`](src/proxy_healthcheck/report.schema.json). Это стабильный
+контракт для CI, хранилища метрик и [Proxybench](../proxybench/), а не только
+текстовый лог.
 
 ## Быстрый старт
 
@@ -109,6 +117,10 @@ proxy-healthcheck --config healthcheck.json --output healthcheck-report.json
 от внутренних правил компании. JSON-отчёт при штатном запуске создаётся для всех
 трёх состояний.
 
+Блок `decision` объясняет итог: он содержит применённые пороги и
+машиночитаемые причины по каждому endpoint. Endpoint-блоки дополнительно
+содержат gates, retry amplification, recovery after retry и error breakdown.
+
 ## Использование как библиотеки
 
 ```python
@@ -170,3 +182,5 @@ offline and uses an injected mock transport. This tool is for authorized
 infrastructure monitoring only; it does not implement anti-bot or restriction
 bypass techniques. System `NO_PROXY` bypass is disabled, redirects are not
 followed, response bodies are capped at 64 KiB, and error categories are stable.
+Report schema 1.1 adds p50/p95, retry amplification, error breakdown, and
+explainable decision gates for CI and Proxybench.

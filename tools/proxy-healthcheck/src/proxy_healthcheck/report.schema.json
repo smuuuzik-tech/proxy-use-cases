@@ -1,0 +1,381 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/tools/proxy-healthcheck/src/proxy_healthcheck/report.schema.json",
+  "title": "Proxy Healthcheck report 1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "status",
+    "exit_code",
+    "summary",
+    "endpoints",
+    "rotation",
+    "decision",
+    "config",
+    "results"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "$ref": "#/$defs/status"
+    },
+    "exit_code": {
+      "enum": [0, 1, 2]
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requests",
+        "successful",
+        "failed",
+        "success_rate",
+        "attempts",
+        "retry_amplification",
+        "recovered_after_retry",
+        "error_categories",
+        "latency_ms",
+        "endpoints"
+      ],
+      "properties": {
+        "requests": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "successful": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "success_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "retry_amplification": {
+          "type": "number",
+          "minimum": 1
+        },
+        "recovered_after_retry": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error_categories": {
+          "$ref": "#/$defs/errorCategories"
+        },
+        "latency_ms": {
+          "$ref": "#/$defs/latency"
+        },
+        "endpoints": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "endpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "status",
+          "requests",
+          "successful",
+          "failed",
+          "success_rate",
+          "attempts",
+          "retry_amplification",
+          "recovered_after_retry",
+          "error_categories",
+          "latency_ms",
+          "observed_ip_count",
+          "unique_ip_count",
+          "minimum_unique_ips",
+          "gates",
+          "issues"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "$ref": "#/$defs/status"
+          },
+          "requests": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "successful": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "success_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "attempts": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "retry_amplification": {
+            "type": "number",
+            "minimum": 1
+          },
+          "recovered_after_retry": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "error_categories": {
+            "$ref": "#/$defs/errorCategories"
+          },
+          "latency_ms": {
+            "$ref": "#/$defs/latency"
+          },
+          "observed_ip_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "unique_ip_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minimum_unique_ips": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "gates": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "$ref": "#/$defs/gate"
+            }
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "rotation": {
+      "type": "object",
+      "required": [
+        "observed",
+        "unique_ips",
+        "reuse_rate",
+        "ip_frequencies",
+        "by_endpoint"
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "reasons", "thresholds"],
+      "properties": {
+        "outcome": {
+          "$ref": "#/$defs/status"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["scope", "endpoint", "code"],
+            "properties": {
+              "scope": {
+                "const": "endpoint"
+              },
+              "endpoint": {
+                "type": "string",
+                "minLength": 1
+              },
+              "code": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "thresholds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "minimum_success_rate",
+            "fail_below_success_rate",
+            "maximum_p95_ms",
+            "minimum_unique_ips"
+          ],
+          "properties": {
+            "minimum_success_rate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "fail_below_success_rate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "maximum_p95_ms": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "minimum_unique_ips": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "config": {
+      "type": "object"
+    },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/checkResult"
+      }
+    }
+  },
+  "$defs": {
+    "status": {
+      "enum": ["healthy", "degraded", "failed"]
+    },
+    "nullableNumber": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "latency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "average", "p50", "p95", "max"],
+      "properties": {
+        "min": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "average": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "p50": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "p95": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "max": {
+          "$ref": "#/$defs/nullableNumber"
+        }
+      }
+    },
+    "errorCategories": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "observed", "operator", "threshold", "passed"],
+      "properties": {
+        "metric": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observed": {
+          "type": ["number", "null"]
+        },
+        "operator": {
+          "enum": [">=", "<=", "=="]
+        },
+        "threshold": {
+          "type": ["number", "string"]
+        },
+        "passed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "checkResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "endpoint",
+        "request_index",
+        "success",
+        "status_code",
+        "latency_ms",
+        "attempts",
+        "observed_ip",
+        "error_category",
+        "error"
+      ],
+      "properties": {
+        "endpoint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "status_code": {
+          "type": ["integer", "null"],
+          "minimum": 100,
+          "maximum": 599
+        },
+        "latency_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6
+        },
+        "observed_ip": {
+          "type": ["string", "null"]
+        },
+        "error_category": {
+          "type": ["string", "null"]
+        },
+        "error": {
+          "type": ["string", "null"]
+        }
+      }
+    }
+  }
+}

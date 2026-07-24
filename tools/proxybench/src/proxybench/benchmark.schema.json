@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/tools/proxybench/src/proxybench/benchmark.schema.json",
+  "title": "Proxybench manifest 1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "name", "policy", "candidates"],
+  "properties": {
+    "$schema": {
+      "const": "./src/proxybench/benchmark.schema.json"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "name": {
+      "$ref": "#/$defs/name"
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "allow_partial": {
+      "type": "boolean",
+      "default": false
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimum_success_rate",
+        "maximum_p95_ms",
+        "maximum_retry_amplification",
+        "rank_by"
+      ],
+      "properties": {
+        "minimum_success_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maximum_p95_ms": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 600000
+        },
+        "maximum_retry_amplification": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 6
+        },
+        "maximum_cost_per_success": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000000
+        },
+        "rank_by": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "success_rate",
+              "cost_per_success",
+              "p95_latency_ms",
+              "retry_amplification"
+            ]
+          }
+        }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "report"],
+        "properties": {
+          "name": {
+            "$ref": "#/$defs/name"
+          },
+          "report": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\u0000]+$"
+          },
+          "total_cost": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000000
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "name": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+    }
+  }
+}

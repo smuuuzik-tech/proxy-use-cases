@@ -205,6 +205,13 @@ def _endpoint_metrics(
     latencies = [check.latency_ms for check in successful]
     ips = [check.observed_ip for check in successful if check.observed_ip]
     counts = Counter(ips)
+    attempts = sum(check.attempts for check in checks)
+    recovered_after_retry = sum(
+        1 for check in successful if check.attempts > 1
+    )
+    error_categories = Counter(
+        check.error_category for check in checks if check.error_category
+    )
     success_rate = len(successful) / len(checks) if checks else 0.0
     minimum_unique = (
         endpoint.minimum_unique_ips
@@ -219,6 +226,29 @@ def _endpoint_metrics(
         reasons.append("p95_latency_above_threshold")
     if len(counts) < minimum_unique:
         reasons.append("unique_ip_count_below_threshold")
+    gates = [
+        {
+            "metric": "success_rate",
+            "observed": round(success_rate, 4),
+            "operator": ">=",
+            "threshold": config.minimum_success_rate,
+            "passed": success_rate >= config.minimum_success_rate,
+        },
+        {
+            "metric": "p95_latency_ms",
+            "observed": p95,
+            "operator": "<=",
+            "threshold": config.maximum_p95_ms,
+            "passed": p95 is not None and p95 <= config.maximum_p95_ms,
+        },
+        {
+            "metric": "unique_ip_count",
+            "observed": len(counts),
+            "operator": ">=",
+            "threshold": minimum_unique,
+            "passed": len(counts) >= minimum_unique,
+        },
+    ]
     if not successful or success_rate < config.fail_below_success_rate:
         endpoint_status = HealthStatus.FAILED
     elif reasons:
@@ -232,15 +262,23 @@ def _endpoint_metrics(
         "successful": len(successful),
         "failed": len(checks) - len(successful),
         "success_rate": round(success_rate, 4),
+        "attempts": attempts,
+        "retry_amplification": round(attempts / len(checks), 4)
+        if checks
+        else None,
+        "recovered_after_retry": recovered_after_retry,
+        "error_categories": dict(sorted(error_categories.items())),
         "latency_ms": {
             "min": round(min(latencies), 3) if latencies else None,
             "average": round(sum(latencies) / len(latencies), 3) if latencies else None,
+            "p50": _percentile(latencies, 0.50),
             "p95": p95,
             "max": round(max(latencies), 3) if latencies else None,
         },
         "observed_ip_count": len(ips),
         "unique_ip_count": len(counts),
         "minimum_unique_ips": minimum_unique,
+        "gates": gates,
         "issues": reasons,
     }
     return metrics, reasons
@@ -301,6 +339,13 @@ def _build_report(config: HealthcheckConfig, results: list[CheckResult]) -> Repo
     total = len(results)
     success_rate = len(successful) / total if total else 0.0
     all_latencies = [result.latency_ms for result in successful]
+    attempts = sum(result.attempts for result in results)
+    recovered_after_retry = sum(
+        1 for result in successful if result.attempts > 1
+    )
+    error_categories = Counter(
+        result.error_category for result in results if result.error_category
+    )
     if failed_endpoints or success_rate < config.fail_below_success_rate or not successful:
         status = HealthStatus.FAILED
         exit_code = ExitCode.FAILED
@@ -311,8 +356,18 @@ def _build_report(config: HealthcheckConfig, results: list[CheckResult]) -> Repo
         status = HealthStatus.HEALTHY
         exit_code = ExitCode.HEALTHY
 
+    decision_reasons = [
+        {
+            "scope": "endpoint",
+            "endpoint": endpoint["name"],
+            "code": issue,
+        }
+        for endpoint in endpoint_reports
+        for issue in endpoint["issues"]
+    ]
+
     return Report(
-        schema_version="1.0",
+        schema_version="1.1",
         generated_at=datetime.now(timezone.utc).isoformat(),
         status=status,
         exit_code=int(exit_code),
@@ -321,16 +376,35 @@ def _build_report(config: HealthcheckConfig, results: list[CheckResult]) -> Repo
             "successful": len(successful),
             "failed": total - len(successful),
             "success_rate": round(success_rate, 4),
+            "attempts": attempts,
+            "retry_amplification": round(attempts / total, 4)
+            if total
+            else None,
+            "recovered_after_retry": recovered_after_retry,
+            "error_categories": dict(sorted(error_categories.items())),
             "latency_ms": {
+                "min": round(min(all_latencies), 3) if all_latencies else None,
                 "average": round(sum(all_latencies) / len(all_latencies), 3)
                 if all_latencies
                 else None,
+                "p50": _percentile(all_latencies, 0.50),
                 "p95": _percentile(all_latencies, 0.95),
+                "max": round(max(all_latencies), 3) if all_latencies else None,
             },
             "endpoints": len(config.endpoints),
         },
         endpoints=endpoint_reports,
         rotation=_rotation_metrics(results),
+        decision={
+            "outcome": status.value,
+            "reasons": decision_reasons,
+            "thresholds": {
+                "minimum_success_rate": config.minimum_success_rate,
+                "fail_below_success_rate": config.fail_below_success_rate,
+                "maximum_p95_ms": config.maximum_p95_ms,
+                "minimum_unique_ips": config.minimum_unique_ips,
+            },
+        },
         config=config.safe_dict(),
         results=results,
     )
