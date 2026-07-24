@@ -23,12 +23,17 @@
 | Встроить в Node.js / Undici | `node-production` |
 | Понять 407, DNS, TLS, timeout, 403 или 429 | `proxy-diagnostics` |
 | Следить за пулом и SLO | `proxy-healthcheck` |
+| Сравнить несколько healthcheck-отчётов по SLO и стоимости | `proxybench` |
 | Выбрать sticky или rotating | `session-strategy` |
 | Проверить собственный сайт из региона | `regional-web-qa` |
 | Изолировать публичный API поставщика | `provider-api-adapter` |
 
 Не выбирайте vendor adapter только из-за упоминания поставщика. Для обычного
 HTTP(S)-подключения сначала используйте provider-neutral SDK.
+
+Для `proxybench` не подавайте отчёты разных workload: endpoint’ы, география,
+число запросов и время измерения должны быть сопоставимы. AI не должен менять
+порядок `rank_by` или SLO-пороги без явного бизнес-решения пользователя.
 
 ## Что уточнить
 

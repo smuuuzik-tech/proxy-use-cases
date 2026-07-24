@@ -1,8 +1,11 @@
 .env
 .venv/
+build/
+dist/
 __pycache__/
 *.py[cod]
 *.egg-info/
 healthcheck.local.json
 healthcheck-report*.json
 report*.json
+!src/proxy_healthcheck/report.schema.json

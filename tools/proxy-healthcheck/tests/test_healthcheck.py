@@ -5,6 +5,7 @@ import sys
 import threading
 import unittest
 from collections import deque
+from importlib.resources import files
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -79,6 +80,14 @@ def config(
 
 
 class HealthcheckTests(unittest.TestCase):
+    def test_report_schema_is_packaged_and_versioned(self) -> None:
+        schema = json.loads(
+            files("proxy_healthcheck")
+            .joinpath("report.schema.json")
+            .read_text(encoding="utf-8")
+        )
+        self.assertEqual(schema["properties"]["schema_version"]["const"], "1.1")
+
     def test_healthy(self) -> None:
         transport = ScriptedTransport(
             {"https://allowed.example/ip": [response("192.0.2.1")] * 4}
@@ -87,6 +96,13 @@ class HealthcheckTests(unittest.TestCase):
         self.assertEqual(report.status, HealthStatus.HEALTHY)
         self.assertEqual(report.exit_code, ExitCode.HEALTHY)
         self.assertEqual(report.summary["success_rate"], 1.0)
+        self.assertEqual(report.schema_version, "1.1")
+        self.assertEqual(report.summary["retry_amplification"], 1.0)
+        self.assertEqual(report.summary["recovered_after_retry"], 0)
+        self.assertEqual(report.summary["error_categories"], {})
+        self.assertEqual(report.decision["outcome"], "healthy")
+        self.assertEqual(report.decision["reasons"], [])
+        self.assertTrue(all(gate["passed"] for gate in report.endpoints[0]["gates"]))
 
     def test_direct_library_config_cannot_bypass_validation(self) -> None:
         unsafe = HealthcheckConfig(
@@ -205,6 +221,47 @@ class HealthcheckTests(unittest.TestCase):
         )
         self.assertEqual(report.status, HealthStatus.HEALTHY)
         self.assertEqual(report.results[0].attempts, 2)
+        self.assertEqual(report.summary["attempts"], 2)
+        self.assertEqual(report.summary["retry_amplification"], 2.0)
+        self.assertEqual(report.summary["recovered_after_retry"], 1)
+
+    def test_failure_breakdown_and_explainable_decision(self) -> None:
+        transport = ScriptedTransport(
+            {
+                "https://allowed.example/ip": [
+                    response("192.0.2.1"),
+                    response("192.0.2.1", status=429),
+                ]
+            }
+        )
+        report = run_healthcheck(
+            config(
+                requests=2,
+                minimum_success_rate=1.0,
+                fail_below_success_rate=0.5,
+            ),
+            transport,
+            clock=StepClock(),
+        )
+        self.assertEqual(report.status, HealthStatus.DEGRADED)
+        self.assertEqual(report.summary["error_categories"], {"rate_limit": 1})
+        self.assertEqual(
+            report.endpoints[0]["error_categories"],
+            {"rate_limit": 1},
+        )
+        self.assertIn(
+            {
+                "scope": "endpoint",
+                "endpoint": "primary",
+                "code": "success_rate_below_healthy_threshold",
+            },
+            report.decision["reasons"],
+        )
+        gates = {
+            gate["metric"]: gate for gate in report.endpoints[0]["gates"]
+        }
+        self.assertFalse(gates["success_rate"]["passed"])
+        self.assertTrue(gates["p95_latency_ms"]["passed"])
 
     def test_secret_redaction_in_report_and_errors(self) -> None:
         secret_url = "http://business-user:super-secret@proxy.internal:8080"

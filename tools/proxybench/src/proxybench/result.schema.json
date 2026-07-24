@@ -1,0 +1,250 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/tools/proxybench/src/proxybench/result.schema.json",
+  "title": "Proxybench result 1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "benchmark",
+    "status",
+    "currency",
+    "recommended_candidate",
+    "policy",
+    "ranking_rule",
+    "candidates",
+    "unavailable",
+    "privacy"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "benchmark": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": ["completed", "partial"]
+    },
+    "currency": {
+      "type": ["string", "null"],
+      "pattern": "^[A-Z]{3}$"
+    },
+    "recommended_candidate": {
+      "type": ["string", "null"]
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimum_success_rate",
+        "maximum_p95_ms",
+        "maximum_retry_amplification",
+        "maximum_cost_per_success",
+        "rank_by"
+      ],
+      "properties": {
+        "minimum_success_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maximum_p95_ms": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maximum_retry_amplification": {
+          "type": "number",
+          "minimum": 1
+        },
+        "maximum_cost_per_success": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "rank_by": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "success_rate",
+              "cost_per_success",
+              "p95_latency_ms",
+              "retry_amplification"
+            ]
+          }
+        }
+      }
+    },
+    "ranking_rule": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/candidate"
+      }
+    },
+    "unavailable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "code"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "code": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "copies_observed_ips",
+        "copies_individual_results",
+        "copies_source_paths"
+      ],
+      "properties": {
+        "copies_observed_ips": {
+          "const": false
+        },
+        "copies_individual_results": {
+          "const": false
+        },
+        "copies_source_paths": {
+          "const": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nullableNumber": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "observed", "operator", "threshold", "passed"],
+      "properties": {
+        "metric": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observed": {
+          "type": ["number", "string", "null"]
+        },
+        "operator": {
+          "enum": [">=", "<=", "=="]
+        },
+        "threshold": {
+          "type": ["number", "string"]
+        },
+        "passed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "rank",
+        "eligible",
+        "failed_gates",
+        "gates",
+        "metrics"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rank": {
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "eligible": {
+          "type": "boolean"
+        },
+        "failed_gates": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "gates": {
+          "type": "array",
+          "minItems": 4,
+          "items": {
+            "$ref": "#/$defs/gate"
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requests",
+            "successful",
+            "success_rate",
+            "p95_latency_ms",
+            "attempts",
+            "retry_amplification",
+            "total_cost",
+            "cost_per_success"
+          ],
+          "properties": {
+            "requests": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "successful": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "success_rate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "p95_latency_ms": {
+              "$ref": "#/$defs/nullableNumber"
+            },
+            "attempts": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "retry_amplification": {
+              "type": "number",
+              "minimum": 1
+            },
+            "total_cost": {
+              "$ref": "#/$defs/nullableNumber"
+            },
+            "cost_per_success": {
+              "$ref": "#/$defs/nullableNumber"
+            }
+          }
+        }
+      }
+    }
+  }
+}

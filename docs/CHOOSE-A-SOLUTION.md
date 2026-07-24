@@ -23,8 +23,14 @@ SDK нужны, когда важны pooling, timeout, retry budget, correlatio
 
 - Инцидент: [Proxy Diagnostics](../tools/proxy-diagnostics/).
 - Мониторинг: [Proxy Healthcheck](../tools/proxy-healthcheck/).
+- Сравнение нескольких пулов:
+  [Proxybench](../tools/proxybench/).
 - Sticky/rotating: [Session Strategy Analyzer](../labs/session-strategy/).
 - Метрики и реакция: [SLO и runbook](B2B-SLO-AND-RUNBOOK.md).
+
+`Proxybench` имеет смысл только после одинакового контролируемого healthcheck
+для каждого кандидата. Он не рекомендует победителя, если обязательные SLO не
+прошёл никто.
 
 ## Есть API конкретного поставщика
 

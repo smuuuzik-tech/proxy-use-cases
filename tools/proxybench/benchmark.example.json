@@ -1,0 +1,31 @@
+{
+  "$schema": "./src/proxybench/benchmark.schema.json",
+  "schema_version": "1.0",
+  "name": "approved-pool-comparison",
+  "currency": "USD",
+  "allow_partial": false,
+  "policy": {
+    "minimum_success_rate": 0.95,
+    "maximum_p95_ms": 2000,
+    "maximum_retry_amplification": 1.5,
+    "maximum_cost_per_success": 0.02,
+    "rank_by": [
+      "success_rate",
+      "cost_per_success",
+      "p95_latency_ms",
+      "retry_amplification"
+    ]
+  },
+  "candidates": [
+    {
+      "name": "pool-a",
+      "report": "reports/pool-a.json",
+      "total_cost": 0.25
+    },
+    {
+      "name": "pool-b",
+      "report": "reports/pool-b.json",
+      "total_cost": 0.30
+    }
+  ]
+}

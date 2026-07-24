@@ -137,6 +137,10 @@
         "latency",
         "egress-ip",
         "rotation-health",
+        "retry-amplification",
+        "error-breakdown",
+        "explainable-gates",
+        "versioned-report-schema",
         "ci-exit-codes"
       ],
       "keywords": [
@@ -144,6 +148,39 @@
         "healthcheck",
         "sre",
         "latency"
+      ]
+    },
+    {
+      "id": "proxybench",
+      "title": "Proxybench",
+      "title_en": "Proxybench",
+      "category": "tool",
+      "maturity_level": 3,
+      "status": "beta",
+      "provider_neutral": true,
+      "runtimes": [
+        "python"
+      ],
+      "path": "tools/proxybench",
+      "readme": "tools/proxybench/README.md",
+      "test_command": "cd tools/proxybench && python -m unittest discover -s tests -v",
+      "choose_when": "Нужно сравнить два или больше пулов по одинаковому healthcheck, явным SLO и стоимости успешного результата.",
+      "avoid_when": "Кандидаты измерялись на разных endpoint, географии, нагрузке или в несопоставимое время.",
+      "capabilities": [
+        "report-comparison",
+        "explicit-slo-gates",
+        "caller-defined-ranking",
+        "retry-amplification",
+        "cost-per-success",
+        "partial-results",
+        "privacy-preserving-output"
+      ],
+      "keywords": [
+        "benchmark",
+        "proxy pool",
+        "slo",
+        "cost",
+        "comparison"
       ]
     },
     {

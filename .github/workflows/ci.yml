@@ -94,9 +94,29 @@ jobs:
         run: |
           python -m pip install -e .
           python -m unittest discover -s tests -v
+          proxy-healthcheck --help >/dev/null
       - name: Compile
         working-directory: tools/proxy-healthcheck
-        run: python -m compileall -q src tests
+        run: |
+          python -m compileall -q src tests
+          python -m pip wheel --no-deps --wheel-dir /tmp/healthcheck-wheel .
+
+  proxybench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.11"
+      - name: Test and compile
+        working-directory: tools/proxybench
+        run: |
+          python -m pip install -e .
+          python -m unittest discover -s tests -v
+          proxybench --help >/dev/null
+          python -m compileall -q src tests
+          python -m pip wheel --no-deps --wheel-dir /tmp/proxybench-wheel .
 
   proxy-diagnostics:
     runs-on: ubuntu-latest

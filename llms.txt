@@ -25,6 +25,7 @@ the product documentation of a proxy vendor.
 
 - [Proxy Diagnostics](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/tools/proxy-diagnostics): Classify proxy authentication, DNS, timeout, TLS, target blocking, rate limiting, and upstream failures.
 - [Proxy Healthcheck](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/tools/proxy-healthcheck): Measure availability, latency, exit IP behavior, and CI-friendly health state.
+- [Proxybench](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/tools/proxybench): Compare sanitized health reports with explicit SLO gates, caller-defined ranking order, retry amplification, and cost per successful result.
 - [Session Strategy Analyzer](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/labs/session-strategy): Compare sticky and rotating strategies using success rate, p95, cost per successful result, continuity, and exit-IP change rate.
 
 ## B2B use cases

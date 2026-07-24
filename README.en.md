@@ -23,7 +23,8 @@ diagnostic path. Use [Choose a solution](docs/CHOOSE-A-SOLUTION.md) for a
 | 1. Connectivity | Verify routing, authentication, and observed egress IP | [cURL quickstart](quickstarts/curl/) |
 | 2. Integration | Integrate proxies in Python with timeouts, a retry budget, and a stable result contract | [Andrey Proxy SDK](integrations/python-production/) |
 | 2. Integration | Integrate proxies in Node.js with an explicit Undici ProxyAgent and bounded retries | [Andrey Proxy Client for Node.js](integrations/node-production/) |
-| 3. Operations | Measure success rate, p95 latency, IP rotation, and pool health | [Proxy Healthcheck](tools/proxy-healthcheck/) |
+| 3. Operations | Measure success rate, p95 latency, retry amplification, errors, and pool health | [Proxy Healthcheck](tools/proxy-healthcheck/) |
+| 3. Decision | Compare pools using the same SLO and cost-per-success policy | [Proxybench](tools/proxybench/) |
 | 3/4. Business workflow | Test an authorized site from an agreed region and retain evidence | [Regional Web QA](use-cases/regional-web-qa/) |
 
 ## Find the problem
@@ -32,9 +33,10 @@ diagnostic path. Use [Choose a solution](docs/CHOOSE-A-SOLUTION.md) for a
 |---|---|
 | `407`, DNS, TLS, timeout, `403`, `429`, or a broken connection | [Proxy Diagnostics](tools/proxy-diagnostics/) |
 | Choose sticky sessions or rotation using workload observations | [Session Strategy Analyzer](labs/session-strategy/) |
+| Choose between two or more pools using measured evidence | [Proxybench](tools/proxybench/) |
 | Isolate a provider's public API behind a defensive client | [Vendor-specific API client](integrations/proxy-market-api/) |
 
-All eight solutions include offline tests and require no real credentials for
+All nine solutions include offline tests and require no real credentials for
 code verification.
 
 ## B2B operating model
