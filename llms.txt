@@ -1,0 +1,38 @@
+# Andrey Malyshev B2B Proxy Toolkit
+
+> Provider-neutral, tested solutions by Andrey Malyshev for integrating HTTP(S) and SOCKS proxies into B2B software, diagnosing failures, operating proxy pools, and validating regional web behavior.
+
+All examples are intended for lawful, authorized systems and public-data workloads.
+The primary SDK and tools are personal engineering work by Andrey Malyshev, not
+the product documentation of a proxy vendor.
+
+## Client onboarding
+
+- [Start here](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/CLIENT-START-HERE.md): Send this guide to a developer or DevOps engineer who needs to configure and integrate proxies.
+- [Repository overview](https://github.com/smuuuzik-tech/proxy-use-cases): Choose a solution by integration maturity or failure symptom.
+- [B2B maturity model](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/B2B-MATURITY-MODEL.md): Decide whether the workload needs a smoke test, SDK, monitoring, or an operational control plane.
+
+## SDK
+
+- [Andrey Proxy SDK for Python](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/integrations/python-production): Provider-neutral HTTPX SDK with bounded retries, granular timeouts, secret redaction, correlation IDs, and a stable result contract.
+- [cURL quickstart](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/quickstarts/curl): Minimal safe connectivity and authentication check.
+
+## Diagnostics and operations
+
+- [Proxy Diagnostics](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/tools/proxy-diagnostics): Classify proxy authentication, DNS, timeout, TLS, target blocking, rate limiting, and upstream failures.
+- [Proxy Healthcheck](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/tools/proxy-healthcheck): Measure availability, latency, exit IP behavior, and CI-friendly health state.
+- [Session Strategy Analyzer](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/labs/session-strategy): Compare sticky and rotating strategies using success rate, p95, cost per successful result, continuity, and exit-IP change rate.
+
+## B2B use cases
+
+- [Regional Web QA](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/use-cases/regional-web-qa): Reproducible, allowlisted website checks from an agreed geography with evidence output.
+- [Reference architecture](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/B2B-REFERENCE-ARCHITECTURE.md): Separate application policy, SDK, proxy pools, observability, and secrets.
+- [SLO and runbook](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/B2B-SLO-AND-RUNBOOK.md): Define success rate, p95, rotation health, incident states, and response steps.
+
+## Optional vendor adapter
+
+- [Provider API adapter](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/integrations/proxy-market-api): An isolated example for one public control-plane API. It is optional and not a universal provider recommendation.
+
+## Contact
+
+- [B2B consultation with Andrey Malyshev](https://andrey-proxy-advisor-private.vercel.app/github?utm_source=github&utm_medium=llms_txt&utm_campaign=b2b_proxy_sdk): Select a case or send workload context.

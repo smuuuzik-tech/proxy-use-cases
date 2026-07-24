@@ -1,8 +1,8 @@
-# Прокси на практике
+# B2B Proxy Toolkit Андрея Малышева
 
 [English](README.en.md)
 
-Провайдер-независимые, запускаемые решения для корпоративной работы с прокси:
+Провайдер-независимые, запускаемые решения для настройки и интеграции прокси:
 от первого smoke test до production-клиента, мониторинга пула и доказательного
 регионального QA.
 
@@ -14,12 +14,16 @@ DevOps/SRE и команд, которым нужен воспроизводим
 **Нужно разобрать корпоративный сценарий?**
 [Открыть экспертную страницу и выбрать время звонка](https://andrey-proxy-advisor-private.vercel.app/github?utm_source=github&utm_medium=readme&utm_campaign=proxy_use_cases).
 
+**Отправляете репозиторий клиенту?**
+[Начните с клиентской инструкции](docs/CLIENT-START-HERE.md): в ней установка
+личного Python SDK Андрея, безопасная передача доступов и маршрут диагностики.
+
 ## Выберите уровень
 
 | Уровень | Задача | Рабочее решение |
 |---|---|---|
 | 1. Подключение | Проверить маршрут, авторизацию и внешний IP | [cURL quickstart](quickstarts/curl/) |
-| 2. Интеграция | Отправлять B2B HTTP-запросы с timeout, retry budget и JSON-результатом | [Python production client](integrations/python-production/) |
+| 2. Интеграция | Встроить прокси в Python с timeout, retry budget и JSON-контрактом | [Andrey Proxy SDK](integrations/python-production/) |
 | 3. Эксплуатация | Измерять success rate, p95, ротацию и состояние прокси-пула | [Proxy Healthcheck](tools/proxy-healthcheck/) |
 | 3/4. Бизнес-процесс | Проверять разрешённый сайт из согласованного региона и сохранять evidence | [Regional Web QA](use-cases/regional-web-qa/) |
 
@@ -41,8 +45,12 @@ DevOps/SRE и команд, которым нужен воспроизводим
   клиента, прокси-пула и наблюдаемости.
 - [Шаблон SLO и runbook](docs/B2B-SLO-AND-RUNBOOK.md) — метрики, состояния и
   порядок действий при инциденте.
-- [Proxy.Market API 1.1](integrations/proxy-market-api/) — технический
-  vendor-specific разбор и безопасный B2B-клиент.
+- [Опциональный API-адаптер](integrations/proxy-market-api/) — пример того,
+  как изолировать контракт конкретного поставщика от основной системы.
+
+Для AI-ассистентов и автоматического разбора документации опубликован
+[машиночитаемый каталог](llms.txt). Он дополняет, но не заменяет README,
+структурированные страницы кейсов и GitHub Topics.
 
 ## Инженерные принципы
 

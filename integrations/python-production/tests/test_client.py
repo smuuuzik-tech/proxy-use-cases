@@ -1,7 +1,7 @@
 import httpx
 import pytest
 
-from proxy_b2b_client import B2BHttpClient, ClientSettings, ConfigError
+from proxy_b2b_client import B2BHttpClient, ClientSettings, ConfigError, ProxyClient
 
 
 def settings(**overrides):
@@ -43,6 +43,32 @@ def test_success_returns_structured_result_without_network():
     assert result.to_dict()["url"] == (
         "https://api.example.test/<redacted-path>?<redacted-query>"
     )
+
+
+def test_personal_sdk_facade_starts_from_environment_and_supports_get():
+    seen = []
+    env = {
+        "B2B_PROXY_URL": "http://proxy.example.test:8080",
+        "B2B_PROXY_USERNAME": "client",
+        "B2B_PROXY_PASSWORD": "private-password",
+    }
+
+    with ProxyClient.from_env(
+        env,
+        transport=httpx.MockTransport(
+            lambda request: seen.append(request) or httpx.Response(200)
+        ),
+        sleep=lambda _: None,
+    ) as client:
+        result = client.get(
+            "https://api.example.test/items?token=private",
+            request_id="sdk-quickstart",
+        )
+
+    assert result.ok is True
+    assert seen[0].headers["user-agent"] == "andrey-proxy-sdk/0.1.0"
+    assert result.to_dict()["url"].endswith("?<redacted-query>")
+    assert "private-password" not in str(result.to_dict())
 
 
 def test_retryable_5xx_uses_bounded_exponential_backoff():
