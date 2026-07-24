@@ -30,7 +30,10 @@
 - конфигурация через переменные окружения;
 - тесты не требуют реального прокси.
 
-Артефакт: [`integrations/python-production`](../integrations/python-production/).
+Артефакты:
+[`integrations/python-production`](../integrations/python-production/) для
+Python и [`integrations/node-production`](../integrations/node-production/) для
+Node.js.
 
 Переходите на следующий уровень, когда появляются несколько маршрутов, регионов, команд или требования к доступности.
 

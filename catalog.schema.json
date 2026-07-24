@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Andrey Malyshev B2B Proxy Toolkit catalog",
+  "type": "object",
+  "required": [
+    "catalog_version",
+    "name",
+    "maintainer",
+    "safety",
+    "solutions"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "maintainer": {
+      "type": "object"
+    },
+    "safety": {
+      "type": "array",
+      "minItems": 1
+    },
+    "solutions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/solution"
+      }
+    }
+  },
+  "$defs": {
+    "strings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "solution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "title_en",
+        "category",
+        "maturity_level",
+        "status",
+        "provider_neutral",
+        "runtimes",
+        "path",
+        "readme",
+        "test_command",
+        "choose_when",
+        "avoid_when",
+        "capabilities",
+        "keywords"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "title": {
+          "type": "string"
+        },
+        "title_en": {
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "quickstart",
+            "sdk",
+            "tool",
+            "lab",
+            "use_case",
+            "vendor_adapter"
+          ]
+        },
+        "maturity_level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "status": {
+          "enum": [
+            "beta",
+            "stable"
+          ]
+        },
+        "provider_neutral": {
+          "type": "boolean"
+        },
+        "runtimes": {
+          "$ref": "#/$defs/strings"
+        },
+        "path": {
+          "type": "string"
+        },
+        "readme": {
+          "type": "string"
+        },
+        "test_command": {
+          "type": "string"
+        },
+        "choose_when": {
+          "type": "string"
+        },
+        "avoid_when": {
+          "type": "string"
+        },
+        "capabilities": {
+          "$ref": "#/$defs/strings"
+        },
+        "keywords": {
+          "$ref": "#/$defs/strings"
+        }
+      }
+    }
+  }
+}

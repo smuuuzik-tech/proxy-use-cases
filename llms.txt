@@ -9,12 +9,16 @@ the product documentation of a proxy vendor.
 ## Client onboarding
 
 - [Start here](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/CLIENT-START-HERE.md): Send this guide to a developer or DevOps engineer who needs to configure and integrate proxies.
+- [Choose a solution](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/CHOOSE-A-SOLUTION.md): Human decision path by runtime, symptom, and maturity.
+- [AI Start Here](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/AI-START-HERE.md): Selection and safety rules for AI assistants.
+- [Canonical JSON catalog](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/catalog.json): Machine-readable solution metadata, capabilities, paths, and test commands.
 - [Repository overview](https://github.com/smuuuzik-tech/proxy-use-cases): Choose a solution by integration maturity or failure symptom.
 - [B2B maturity model](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/B2B-MATURITY-MODEL.md): Decide whether the workload needs a smoke test, SDK, monitoring, or an operational control plane.
 
 ## SDK
 
 - [Andrey Proxy SDK for Python](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/integrations/python-production): Provider-neutral HTTPX SDK with bounded retries, granular timeouts, secret redaction, correlation IDs, and a stable result contract.
+- [Andrey Proxy Client for Node.js](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/integrations/node-production): Provider-neutral Undici ProxyAgent client with bounded retries, deadlines, response limits, and redacted results.
 - [cURL quickstart](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/quickstarts/curl): Minimal safe connectivity and authentication check.
 
 ## Diagnostics and operations
