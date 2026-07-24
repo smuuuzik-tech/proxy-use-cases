@@ -136,6 +136,16 @@ def _transport_message(exc: httpx.TransportError) -> str:
 class B2BHttpClient:
     """Reusable HTTPX client for B2B requests sent through one proxy endpoint."""
 
+    @classmethod
+    def from_env(
+        cls,
+        env: Optional[Mapping[str, str]] = None,
+        **client_kwargs: Any,
+    ) -> "B2BHttpClient":
+        """Create a ready client from validated B2B_PROXY_* environment values."""
+
+        return cls(ClientSettings.from_env(env), **client_kwargs)
+
     def __init__(
         self,
         settings: ClientSettings,
@@ -162,7 +172,7 @@ class B2BHttpClient:
             "limits": limits,
             "follow_redirects": settings.follow_redirects,
             "trust_env": False,
-            "headers": {"User-Agent": "proxy-b2b-client/0.1.0"},
+            "headers": {"User-Agent": "andrey-proxy-sdk/0.1.0"},
         }
         if transport is None:
             kwargs["proxy"] = settings.authenticated_proxy_url
@@ -184,6 +194,24 @@ class B2BHttpClient:
 
     def close(self) -> None:
         self._client.close()
+
+    def get(
+        self,
+        url: str,
+        *,
+        headers: Optional[Mapping[str, str]] = None,
+        request_id: Optional[str] = None,
+        retry: Optional[bool] = None,
+    ) -> RequestResult:
+        """Send a GET request with the SDK's bounded retry and redaction policy."""
+
+        return self.request(
+            "GET",
+            url,
+            headers=headers,
+            request_id=request_id,
+            retry=retry,
+        )
 
     def _delay_for_retry(self, failed_attempt: int) -> float:
         exponential = self.settings.backoff_base * (2 ** (failed_attempt - 1))

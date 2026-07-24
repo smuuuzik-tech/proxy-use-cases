@@ -1,0 +1,8 @@
+{"strategy":"sticky","request_id":"s-001","session_id":"cart-1","exit_ip":"192.0.2.10","status_code":200,"latency_ms":420,"cost_units":1.2,"success":true}
+{"strategy":"sticky","request_id":"s-002","session_id":"cart-1","exit_ip":"192.0.2.10","status_code":200,"latency_ms":460,"cost_units":1.2,"success":true}
+{"strategy":"sticky","request_id":"s-003","session_id":"cart-1","exit_ip":"192.0.2.10","status_code":200,"latency_ms":510,"cost_units":1.2,"success":true}
+{"strategy":"sticky","request_id":"s-004","session_id":"cart-2","exit_ip":"192.0.2.11","status_code":429,"latency_ms":780,"cost_units":1.2,"success":false}
+{"strategy":"rotating","request_id":"r-001","session_id":"item-1","exit_ip":"198.51.100.20","status_code":200,"latency_ms":330,"cost_units":1.0,"success":true}
+{"strategy":"rotating","request_id":"r-002","session_id":"item-2","exit_ip":"198.51.100.21","status_code":200,"latency_ms":350,"cost_units":1.0,"success":true}
+{"strategy":"rotating","request_id":"r-003","session_id":"item-3","exit_ip":"198.51.100.22","status_code":200,"latency_ms":370,"cost_units":1.0,"success":true}
+{"strategy":"rotating","request_id":"r-004","session_id":"item-4","exit_ip":"198.51.100.23","status_code":403,"latency_ms":410,"cost_units":1.0,"success":false}

@@ -3,11 +3,14 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "proxy-b2b-client"
+name = "andrey-proxy-sdk"
 version = "0.1.0"
-description = "Provider-neutral production HTTP client for B2B proxy workloads"
+description = "Provider-neutral Python SDK for production B2B proxy workloads"
 readme = "README.md"
 requires-python = ">=3.9"
+authors = [{ name = "Andrey Malyshev" }]
+license = { text = "MIT" }
+keywords = ["proxy", "b2b", "httpx", "web-data", "sdk"]
 dependencies = [
   "httpx>=0.28.0,<1.0",
 ]
@@ -18,6 +21,12 @@ dev = ["pytest>=8.0,<9.0"]
 
 [project.scripts]
 proxy-b2b = "proxy_b2b_client.cli:main"
+andrey-proxy = "proxy_b2b_client.cli:main"
+
+[project.urls]
+Documentation = "https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/integrations/python-production"
+Source = "https://github.com/smuuuzik-tech/proxy-use-cases"
+Issues = "https://github.com/smuuuzik-tech/proxy-use-cases/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
