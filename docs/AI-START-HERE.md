@@ -23,6 +23,7 @@
 | Проверить подключение | `curl-quickstart` |
 | Встроить в Python / HTTPX / ETL | `python-production` |
 | Встроить в Node.js / Undici | `node-production` |
+| Проверить зависимость ротации от нового proxy tunnel | `node-production` → `./rotation` |
 | HTTP недостаточно; нужен разрешённый browser check | `node-production` → `./browser` |
 | Понять 407, DNS, TLS, timeout, 403 или 429 | `proxy-diagnostics` |
 | Следить за пулом и SLO | `proxy-healthcheck` |
@@ -33,6 +34,12 @@
 
 Не выбирайте vendor adapter только из-за упоминания поставщика. Для обычного
 HTTP(S)-подключения сначала используйте provider-neutral SDK.
+
+В Node.js не предлагайте `fresh_tunnel` без измерения. Сначала используйте
+`andrey-proxy-sdk-node/rotation`; отчёт не должен содержать raw observation или
+fingerprint. `independent_request_mode=fresh_tunnel` применим только к
+независимым запросам. Для многошаговой сессии нужен sticky endpoint или session
+token поставщика.
 
 Для `proxybench` не подавайте отчёты разных workload: endpoint’ы, география,
 число запросов и время измерения должны быть сопоставимы. AI не должен менять

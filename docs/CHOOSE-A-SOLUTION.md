@@ -20,6 +20,10 @@
 SDK нужны, когда важны pooling, timeout, retry budget, correlation ID и
 стабильный результат. Для одного ручного запроса SDK избыточен.
 
+Если в Node.js один exit IP удерживается внутри переиспользуемого соединения,
+запустите [диагностику connection strategy](CONNECTION-STRATEGIES-AND-ROTATION.md).
+Она сравнивает `pooled` и `fresh_tunnel` без публикации наблюдаемых IP.
+
 Browser Route выбирайте только после проверки обычного HTTP route и явного
 решения владельца сценария. Для настоящего прокси начните с
 [локального acceptance](LOCAL-REAL-PROXY-ACCEPTANCE.md).
@@ -31,6 +35,8 @@ Browser Route выбирайте только после проверки обы
 - Сравнение нескольких пулов:
   [Proxybench](../tools/proxybench/).
 - Sticky/rotating: [Session Strategy Analyzer](../labs/session-strategy/).
+- Ротация зависит от нового соединения:
+  [Connection strategies](CONNECTION-STRATEGIES-AND-ROTATION.md).
 - Метрики и реакция: [SLO и runbook](B2B-SLO-AND-RUNBOOK.md).
 
 `Proxybench` имеет смысл только после одинакового контролируемого healthcheck

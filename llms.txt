@@ -16,13 +16,14 @@ the product documentation of a proxy vendor.
 - [Execution JSON Schema](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/contracts/proxy-execution.schema.json): Canonical machine-readable schema and version.
 - [Policy-gated Browser Route](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/BROWSER-ROUTE-AND-REPLAY.md): Manually approved Playwright route with exact allowlists, private durable jobs, and integrity-verified replay.
 - [Local real-proxy acceptance](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/LOCAL-REAL-PROXY-ACCEPTANCE.md): Test HTTP and browser routes without publishing credentials, targets, or observed exit IP.
+- [Connection strategies and rotation](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/CONNECTION-STRATEGIES-AND-ROTATION.md): Compare pooled and fresh proxy tunnels using aggregate-only diagnostics.
 - [Repository overview](https://github.com/smuuuzik-tech/proxy-use-cases): Choose a solution by integration maturity or failure symptom.
 - [B2B maturity model](https://github.com/smuuuzik-tech/proxy-use-cases/blob/main/docs/B2B-MATURITY-MODEL.md): Decide whether the workload needs a smoke test, SDK, monitoring, or an operational control plane.
 
 ## SDK
 
 - [Andrey Proxy SDK for Python](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/integrations/python-production): Provider-neutral HTTPX SDK with bounded retries, granular timeouts, secret redaction, correlation IDs, and a stable result contract.
-- [Andrey Proxy Client for Node.js](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/integrations/node-production): Provider-neutral Undici ProxyAgent client with bounded retries, deadlines, response limits, and redacted results.
+- [Andrey Proxy Client for Node.js](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/integrations/node-production): Provider-neutral Undici client with pooled/fresh-tunnel strategies, safe rotation diagnostics, bounded retries, deadlines, response limits, and redacted results.
 - [cURL quickstart](https://github.com/smuuuzik-tech/proxy-use-cases/tree/main/quickstarts/curl): Minimal safe connectivity and authentication check.
 
 ## Diagnostics and operations

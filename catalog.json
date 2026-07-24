@@ -1,6 +1,6 @@
 {
   "$schema": "./catalog.schema.json",
-  "catalog_version": "1.2.0",
+  "catalog_version": "1.3.0",
   "name": "Andrey Malyshev B2B Proxy Toolkit",
   "default_language": "ru",
   "documentation_languages": [
@@ -117,11 +117,14 @@
       "path": "integrations/node-production",
       "readme": "integrations/node-production/README.md",
       "test_command": "cd integrations/node-production && npm test",
-      "choose_when": "Прокси нужно встроить в Node.js-сервис; HTTP route можно дополнить вручную разрешённым browser route с durable replay.",
+      "choose_when": "Прокси нужно встроить в Node.js-сервис, измеримо выбрать pooled или fresh tunnel; HTTP route можно дополнить вручную разрешённым browser route.",
       "avoid_when": "Нужен только разовый smoke test или нет явного разрешения на browser automation.",
       "capabilities": [
         "undici",
         "proxy-agent",
+        "connection-pooling",
+        "fresh-tunnel",
+        "safe-rotation-diagnostic",
         "bounded-retries",
         "timeouts",
         "response-limit",
@@ -142,6 +145,8 @@
         "typescript",
         "undici",
         "proxyagent",
+        "connection strategy",
+        "proxy rotation",
         "playwright",
         "browser route",
         "durable job",

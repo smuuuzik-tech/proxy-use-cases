@@ -26,6 +26,7 @@ function validConfig() {
     },
     http: {
       target_url: "https://service.example.test/ip",
+      connection_mode: "fresh_tunnel",
       request_id: "acceptance-001",
       fingerprint_json_field: "network.ip",
       body_assertion: {
@@ -60,6 +61,7 @@ test("loads a private acceptance config without exposing its values", async () =
 
   assert.equal(config.proxy.username, "client-user");
   assert.equal(config.http.bodyAssertion.jsonField, "network.ip");
+  assert.equal(config.http.connectionMode, "fresh_tunnel");
   assert.equal(config.browser.approved, true);
   assert.equal(
     config.artifactDir,
@@ -126,6 +128,7 @@ test("acceptance summary contains decisions but no response body", () => {
     completedAt: new Date("2026-07-24T10:00:00.000Z"),
     httpResult: {
       ok: true,
+      connectionMode: "fresh_tunnel",
       execution,
       body: Buffer.from("private response"),
     },
@@ -144,5 +147,6 @@ test("acceptance summary contains decisions but no response body", () => {
   });
 
   assert.equal(summary.passed, true);
+  assert.equal(summary.http.connection_mode, "fresh_tunnel");
   assert.doesNotMatch(JSON.stringify(summary), /private response/);
 });

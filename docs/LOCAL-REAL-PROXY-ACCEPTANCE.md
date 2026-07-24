@@ -38,6 +38,9 @@ chmod 600 acceptance.private.json
 Заполните `acceptance.private.json` локально. Этот файл и все job artifacts
 находятся в `.gitignore`.
 
+`http.connection_mode` принимает `pooled` (по умолчанию) или `fresh_tunnel`.
+Сначала используйте `pooled`; менять режим стоит после сравнительной проверки.
+
 Если у прокси нет авторизации, удалите `username` и `password`. Если endpoint не
 возвращает JSON с ожидаемым IP, удалите `body_assertion` и
 `fingerprint_json_field`.
@@ -134,17 +137,21 @@ security logs поставщика.
 
 ## Проверка sticky и rotation
 
-Запустите acceptance 3–5 раз без `browser.job_id`:
+Для контролируемого сравнения двух режимов укажите тот же разрешённый JSON
+endpoint через переменные окружения и запустите:
 
 ```bash
-npm run acceptance:local
+export B2B_ROTATION_TARGET_URL='https://authorized.example.net/identity'
+export B2B_ROTATION_TARGET_LABEL='authorized identity endpoint'
+export B2B_ROTATION_JSON_FIELD='ip'
+export B2B_ROTATION_SAMPLES_PER_MODE='10'
+npm exec -- andrey-proxy-rotation
 ```
 
-Сравните `http.body_assertion.observation_fingerprint`:
-
-- одинаковый fingerprint при сохранённой сессии согласуется со sticky;
-- меняющиеся fingerprints согласуются с rotation;
-- это наблюдение, а не гарантия политики поставщика.
+Команда сравнит `pooled` и `fresh_tunnel`. Raw IP и fingerprints не попадут в
+отчёт. Поле `automatic_mode_change=false` означает, что production-конфигурация
+не меняется без вашего решения. Подробности:
+[Стратегии соединения и ротация](CONNECTION-STRATEGIES-AND-ROTATION.md).
 
 Для полноценного сравнительного теста используйте Proxy Healthcheck и
 Proxybench на одинаковом workload.

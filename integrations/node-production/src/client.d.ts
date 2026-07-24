@@ -1,7 +1,10 @@
+export type ProxyConnectionMode = "pooled" | "fresh_tunnel";
+
 export interface ProxySettings {
   proxyUrl: string;
   proxyUsername?: string;
   proxyPassword?: string;
+  connectionMode?: ProxyConnectionMode;
   maxAttempts?: number;
   connectTimeoutMs?: number;
   headersTimeoutMs?: number;
@@ -82,6 +85,7 @@ export class ProxyResult {
   readonly url: string;
   readonly body: Uint8Array | null;
   readonly contentType: string;
+  readonly connectionMode: ProxyConnectionMode;
   readonly error: {
     code: string;
     kind: "aborted" | "response_limit" | "timeout" | "transport";
