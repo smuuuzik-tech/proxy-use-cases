@@ -64,6 +64,34 @@ jobs:
         working-directory: tools/proxy-healthcheck
         run: python -m compileall -q src tests
 
+  proxy-diagnostics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.11"
+      - name: Test and compile
+        working-directory: tools/proxy-diagnostics
+        run: |
+          python -m unittest discover -s tests -v
+          python -m compileall -q src tests
+
+  session-strategy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.11"
+      - name: Test and compile
+        working-directory: labs/session-strategy
+        run: |
+          python -m unittest discover -s tests -v
+          python -m compileall -q src tests
+
   proxy-market-api:
     runs-on: ubuntu-latest
     timeout-minutes: 10

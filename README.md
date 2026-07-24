@@ -23,7 +23,15 @@ DevOps/SRE и команд, которым нужен воспроизводим
 | 3. Эксплуатация | Измерять success rate, p95, ротацию и состояние прокси-пула | [Proxy Healthcheck](tools/proxy-healthcheck/) |
 | 3/4. Бизнес-процесс | Проверять разрешённый сайт из согласованного региона и сохранять evidence | [Regional Web QA](use-cases/regional-web-qa/) |
 
-Все четыре решения имеют офлайн-тесты и не требуют настоящих credentials для
+## Найдите проблему
+
+| Симптом или решение | Рабочий материал |
+|---|---|
+| `407`, DNS, TLS, timeout, `403`, `429` или обрыв соединения | [Proxy Diagnostics](tools/proxy-diagnostics/) |
+| Нужно выбрать sticky-сессию или rotation на данных workload | [Session Strategy Analyzer](labs/session-strategy/) |
+| Нужен изолированный адаптер публичного API конкретного провайдера | [Vendor-specific API client](integrations/proxy-market-api/) |
+
+Все семь решений имеют офлайн-тесты и не требуют настоящих credentials для
 проверки кода.
 
 ## B2B-контур

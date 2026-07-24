@@ -19,7 +19,15 @@ specifics live in separate technical studies.
 | 3. Operations | Measure success rate, p95 latency, IP rotation, and pool health | [Proxy Healthcheck](tools/proxy-healthcheck/) |
 | 3/4. Business workflow | Test an authorized site from an agreed region and retain evidence | [Regional Web QA](use-cases/regional-web-qa/) |
 
-All four solutions include offline tests and require no real credentials for
+## Find the problem
+
+| Symptom or decision | Runnable material |
+|---|---|
+| `407`, DNS, TLS, timeout, `403`, `429`, or a broken connection | [Proxy Diagnostics](tools/proxy-diagnostics/) |
+| Choose sticky sessions or rotation using workload observations | [Session Strategy Analyzer](labs/session-strategy/) |
+| Isolate a provider's public API behind a defensive client | [Vendor-specific API client](integrations/proxy-market-api/) |
+
+All seven solutions include offline tests and require no real credentials for
 code verification.
 
 ## B2B operating model
