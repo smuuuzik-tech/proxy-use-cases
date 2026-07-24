@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/smuuuzik-tech/proxy-use-cases/main/contracts/proxy-execution.schema.json",
+  "title": "Provider-neutral proxy execution contract",
+  "description": "Sanitized metadata emitted by the Python and Node.js SDKs for one proxy-backed request.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "route",
+    "quality",
+    "cost"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selected",
+        "reason",
+        "next_action",
+        "automatic_escalation",
+        "manual_candidates"
+      ],
+      "properties": {
+        "selected": {
+          "enum": [
+            "http_proxy",
+            "browser",
+            "managed_unblocker",
+            "ai_extraction"
+          ]
+        },
+        "reason": {
+          "enum": [
+            "configured_http_proxy"
+          ]
+        },
+        "next_action": {
+          "enum": [
+            "complete",
+            "none",
+            "review_http_response",
+            "review_policy_or_credentials",
+            "review_response_limit",
+            "review_retry_or_escalation"
+          ]
+        },
+        "automatic_escalation": {
+          "const": false
+        },
+        "manual_candidates": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "browser",
+              "managed_unblocker",
+              "ai_extraction"
+            ]
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome",
+        "attempts",
+        "retries",
+        "elapsed_ms",
+        "status_code",
+        "response_bytes"
+      ],
+      "properties": {
+        "outcome": {
+          "enum": [
+            "success",
+            "http_error",
+            "transport_error",
+            "timeout",
+            "aborted",
+            "response_limit"
+          ]
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9
+        },
+        "elapsed_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "status_code": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 100,
+          "maximum": 599
+        },
+        "response_bytes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "basis",
+        "currency",
+        "unit_cost",
+        "estimated_total"
+      ],
+      "properties": {
+        "basis": {
+          "enum": [
+            "not_configured",
+            "per_attempt"
+          ]
+        },
+        "currency": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Z]{3}$"
+        },
+        "unit_cost": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "estimated_total": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

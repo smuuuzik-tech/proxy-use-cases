@@ -40,6 +40,9 @@ def test_success_returns_structured_result_without_network():
     assert result.response.json() == {"service": "ok"}
     assert seen[0].headers["x-request-id"] == "req-001"
     assert "very-secret" not in str(result.to_dict())
+    assert result.execution.quality.outcome == "success"
+    assert result.to_dict()["execution"]["route"]["selected"] == "http_proxy"
+    assert result.to_dict()["execution"]["route"]["automatic_escalation"] is False
     assert result.to_dict()["url"] == (
         "https://api.example.test/<redacted-path>?<redacted-query>"
     )
@@ -66,7 +69,7 @@ def test_personal_sdk_facade_starts_from_environment_and_supports_get():
         )
 
     assert result.ok is True
-    assert seen[0].headers["user-agent"] == "andrey-proxy-sdk/0.1.0"
+    assert seen[0].headers["user-agent"] == "andrey-proxy-sdk/0.2.0"
     assert result.to_dict()["url"].endswith("?<redacted-query>")
     assert "private-password" not in str(result.to_dict())
 
@@ -93,6 +96,28 @@ def test_retryable_5xx_uses_bounded_exponential_backoff():
     assert result.attempts == 3
     assert calls == 3
     assert sleeps == [0.125, 0.225]
+
+
+def test_configured_attempt_cost_is_estimated_after_retries():
+    statuses = iter([503, 200])
+
+    with B2BHttpClient(
+        settings(
+            estimated_cost_per_attempt=0.002,
+            cost_currency="USD",
+        ),
+        transport=httpx.MockTransport(lambda _request: httpx.Response(next(statuses))),
+        sleep=lambda _: None,
+        jitter=lambda _low, _high: 0,
+    ) as client:
+        result = client.request("GET", "https://api.example.test/data")
+
+    assert result.to_dict()["execution"]["cost"] == {
+        "basis": "per_attempt",
+        "currency": "USD",
+        "unit_cost": 0.002,
+        "estimated_total": 0.004,
+    }
 
 
 def test_non_retryable_4xx_returns_after_first_attempt():
@@ -167,6 +192,23 @@ def test_transport_error_retries_idempotent_request_and_stays_sanitized():
     assert result.error_code == "transport_error"
     assert payload["error"]["message"] == "Proxy connection failed."
     assert "hunter2" not in str(payload)
+
+
+def test_timeout_is_normalized_in_execution_contract():
+    def handler(request):
+        raise httpx.ReadTimeout("private timeout detail", request=request)
+
+    with B2BHttpClient(
+        settings(max_attempts=1),
+        transport=httpx.MockTransport(handler),
+        sleep=lambda _: None,
+    ) as client:
+        result = client.request("GET", "https://api.example.test/data")
+
+    assert result.error_code == "transport_error"
+    assert result.execution.quality.outcome == "timeout"
+    assert result.execution.route.next_action == "review_retry_or_escalation"
+    assert "private timeout detail" not in str(result.to_dict())
 
 
 def test_retry_after_is_honored_within_budget():

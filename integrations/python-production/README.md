@@ -25,6 +25,8 @@
 - proxy URL и credentials задаются раздельно;
 - путь, query, userinfo и fragment не попадают в JSON-результат;
 - тело ответа не печатается CLI, но доступно библиотечному коду;
+- typed-блок `execution` одинаков с Node.js SDK и содержит route, quality,
+  next action и опциональную оценку cost;
 - офлайн-тесты используют `httpx.MockTransport`.
 
 Literal IP/localhost проверяются локально. Если target URL поступает от
@@ -87,6 +89,15 @@ export B2B_PROXY_PASSWORD='secret-from-secret-manager'
 Основные limits перечислены в [.env.example](.env.example). Значения
 проверяются на конечность и имеют верхние границы.
 
+Если известна оценка одной сетевой попытки, можно добавить оба значения:
+
+```bash
+export B2B_ESTIMATED_COST_PER_ATTEMPT='0.002'
+export B2B_COST_CURRENCY='USD'
+```
+
+Без них SDK явно возвращает `cost.basis=not_configured`.
+
 ## Безопасный CLI
 
 Простой GET:
@@ -127,6 +138,34 @@ proxy-b2b https://service.example/resources/42 \
 {
   "attempts": 1,
   "elapsed_ms": 184,
+  "execution": {
+    "schema_version": "1.0",
+    "route": {
+      "selected": "http_proxy",
+      "reason": "configured_http_proxy",
+      "next_action": "complete",
+      "automatic_escalation": false,
+      "manual_candidates": [
+        "browser",
+        "managed_unblocker",
+        "ai_extraction"
+      ]
+    },
+    "quality": {
+      "outcome": "success",
+      "attempts": 1,
+      "retries": 0,
+      "elapsed_ms": 184,
+      "status_code": 200,
+      "response_bytes": 17
+    },
+    "cost": {
+      "basis": "not_configured",
+      "currency": null,
+      "unit_cost": null,
+      "estimated_total": null
+    }
+  },
   "method": "GET",
   "ok": true,
   "request_id": "c275f985-809d-4428-9546-993e31392c66",
@@ -172,6 +211,10 @@ if not result.ok:
 
 items = result.response.json()
 ```
+
+`result.execution` — typed dataclass. Для передачи в мониторинг используйте
+`result.execution.to_dict()`. Полный формат и правила ручной эскалации:
+[Execution Contract](../../docs/EXECUTION-CONTRACT.md).
 
 Расширенная конфигурация:
 

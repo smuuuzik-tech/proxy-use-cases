@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "route": {
+    "selected": "http_proxy",
+    "reason": "configured_http_proxy",
+    "next_action": "complete",
+    "automatic_escalation": false,
+    "manual_candidates": [
+      "browser",
+      "managed_unblocker",
+      "ai_extraction"
+    ]
+  },
+  "quality": {
+    "outcome": "success",
+    "attempts": 1,
+    "retries": 0,
+    "elapsed_ms": 184,
+    "status_code": 200,
+    "response_bytes": 17
+  },
+  "cost": {
+    "basis": "not_configured",
+    "currency": null,
+    "unit_cost": null,
+    "estimated_total": null
+  }
+}

@@ -69,6 +69,25 @@ def _parse_bool(env: Mapping[str, str], name: str, default: bool) -> bool:
     raise ConfigError(f"{name} must be true or false.")
 
 
+def _parse_optional_float(
+    env: Mapping[str, str],
+    name: str,
+    *,
+    minimum: float,
+    maximum: float,
+) -> Optional[float]:
+    raw = env.get(name)
+    if raw is None or not raw.strip():
+        return None
+    try:
+        value = float(raw)
+    except ValueError as exc:
+        raise ConfigError(f"{name} must be a number.") from exc
+    if not math.isfinite(value) or value < minimum or value > maximum:
+        raise ConfigError(f"{name} must be finite and in range {minimum}..{maximum}.")
+    return value
+
+
 @dataclass(frozen=True)
 class ClientSettings:
     """Settings for one reusable HTTPX client and its retry policy."""
@@ -92,6 +111,8 @@ class ClientSettings:
     max_response_bytes: int = 1_048_576
     allow_http_targets: bool = False
     allow_private_targets: bool = False
+    estimated_cost_per_attempt: Optional[float] = None
+    cost_currency: Optional[str] = None
 
     def __post_init__(self) -> None:
         parsed = urlsplit(self.proxy_url)
@@ -167,6 +188,24 @@ class ClientSettings:
             raise ConfigError("total_deadline must be finite and in range 1..600.")
         if not 1 <= self.max_response_bytes <= 10_485_760:
             raise ConfigError("max_response_bytes must be in range 1..10485760.")
+        if (self.estimated_cost_per_attempt is None) != (self.cost_currency is None):
+            raise ConfigError(
+                "estimated_cost_per_attempt and cost_currency must be set together."
+            )
+        if self.estimated_cost_per_attempt is not None and (
+            not math.isfinite(self.estimated_cost_per_attempt)
+            or not 0 <= self.estimated_cost_per_attempt <= 1_000_000
+        ):
+            raise ConfigError(
+                "estimated_cost_per_attempt must be finite and in range 0..1000000."
+            )
+        if self.cost_currency is not None and (
+            len(self.cost_currency) != 3
+            or not self.cost_currency.isalpha()
+            or not self.cost_currency.isupper()
+            or not self.cost_currency.isascii()
+        ):
+            raise ConfigError("cost_currency must be a three-letter uppercase code.")
 
     @property
     def authenticated_proxy_url(self) -> str:
@@ -247,5 +286,16 @@ class ClientSettings:
             ),
             allow_private_targets=_parse_bool(
                 source, "B2B_ALLOW_PRIVATE_TARGETS", False
+            ),
+            estimated_cost_per_attempt=_parse_optional_float(
+                source,
+                "B2B_ESTIMATED_COST_PER_ATTEMPT",
+                minimum=0,
+                maximum=1_000_000,
+            ),
+            cost_currency=(
+                source["B2B_COST_CURRENCY"].strip().upper()
+                if source.get("B2B_COST_CURRENCY", "").strip()
+                else None
             ),
         )

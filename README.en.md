@@ -39,10 +39,15 @@ diagnostic path. Use [Choose a solution](docs/CHOOSE-A-SOLUTION.md) for a
 All nine solutions include offline tests and require no real credentials for
 code verification.
 
+Both SDKs emit the same versioned
+[execution contract](docs/EXECUTION-CONTRACT.md) for route, decision, attempts,
+quality, safe next action, and optional estimated cost.
+
 ## B2B operating model
 
 - [Maturity model](docs/B2B-MATURITY-MODEL.md)
 - [Reference architecture](docs/B2B-REFERENCE-ARCHITECTURE.md)
+- [Execution contract](docs/EXECUTION-CONTRACT.md)
 - [SLO and incident runbook template](docs/B2B-SLO-AND-RUNBOOK.md)
 - [Optional provider API adapter](integrations/proxy-market-api/) — an example
   of isolating a specific provider contract from the core system.

@@ -3,6 +3,8 @@ import { isIP } from "node:net";
 
 import { ProxyAgent, request as undiciRequest } from "undici";
 
+import { buildExecutionContract } from "./execution.js";
+
 const IDEMPOTENT = new Set(["GET", "HEAD", "OPTIONS", "PUT", "DELETE"]);
 const RETRYABLE = new Set([408, 425, 429, 500, 502, 503, 504]);
 const DEFAULTS = Object.freeze({
@@ -18,6 +20,8 @@ const DEFAULTS = Object.freeze({
   retryAfterMaxMs: 10_000,
   allowHttpTargets: false,
   allowPrivateTargets: false,
+  estimatedCostPerAttempt: null,
+  costCurrency: null,
 });
 
 export class ProxyConfigError extends Error {
@@ -47,6 +51,8 @@ export class ProxyResult {
     body = null,
     contentType = "",
     error = null,
+    estimatedCostPerAttempt = null,
+    costCurrency = null,
   }) {
     this.ok = ok;
     this.statusCode = statusCode;
@@ -59,6 +65,16 @@ export class ProxyResult {
     this.body = body;
     this.contentType = contentType;
     this.error = error;
+    this.execution = buildExecutionContract({
+      ok,
+      attempts,
+      elapsedMs,
+      statusCode,
+      responseBytes: body == null ? null : body.byteLength,
+      errorKind: error?.kind || null,
+      estimatedCostPerAttempt,
+      costCurrency,
+    });
   }
 
   text(encoding = "utf8") {
@@ -73,6 +89,7 @@ export class ProxyResult {
     const value = {
       attempts: this.attempts,
       elapsed_ms: this.elapsedMs,
+      execution: this.execution,
       method: this.method,
       ok: this.ok,
       request_id: this.requestId,
@@ -113,6 +130,12 @@ export function settingsFromEnv(env = process.env) {
     retryAfterMaxMs: integer(env.B2B_RETRY_AFTER_MAX_MS, 10_000, 0, 120_000),
     allowHttpTargets: boolean(env.B2B_ALLOW_HTTP_TARGETS, false),
     allowPrivateTargets: boolean(env.B2B_ALLOW_PRIVATE_TARGETS, false),
+    estimatedCostPerAttempt: optionalNumber(
+      env.B2B_ESTIMATED_COST_PER_ATTEMPT,
+      0,
+      1_000_000,
+    ),
+    costCurrency: currency(env.B2B_COST_CURRENCY),
   });
 }
 
@@ -185,6 +208,7 @@ export class ProxyClient {
           requestId,
           targetUrl,
           now: this.now,
+          settings: this.settings,
         });
       }
       const timeoutSignal = AbortSignal.timeout(remaining);
@@ -217,6 +241,8 @@ export class ProxyClient {
           targetUrl,
           body,
           contentType: header(response.headers, "content-type"),
+          estimatedCostPerAttempt: this.settings.estimatedCostPerAttempt,
+          costCurrency: this.settings.costCurrency,
         });
 
         if (
@@ -252,6 +278,7 @@ export class ProxyClient {
             requestId,
             targetUrl,
             now: this.now,
+            settings: this.settings,
           });
         }
         const delay = backoff(attempt, this.settings, this.random);
@@ -263,6 +290,7 @@ export class ProxyClient {
             requestId,
             targetUrl,
             now: this.now,
+            settings: this.settings,
           });
         }
         try {
@@ -275,6 +303,7 @@ export class ProxyClient {
             requestId,
             targetUrl,
             now: this.now,
+            settings: this.settings,
           });
         }
       }
@@ -331,6 +360,34 @@ function validateSettings(input) {
   }
   if (settings.backoffMaxMs < settings.backoffBaseMs) {
     throw new ProxyConfigError("backoffMaxMs must be >= backoffBaseMs", "INVALID_BACKOFF");
+  }
+  if ((settings.estimatedCostPerAttempt == null) !== (settings.costCurrency == null)) {
+    throw new ProxyConfigError(
+      "estimatedCostPerAttempt and costCurrency must be provided together",
+      "INVALID_COST_CONFIGURATION",
+    );
+  }
+  if (
+    settings.estimatedCostPerAttempt != null &&
+    (
+      !Number.isFinite(settings.estimatedCostPerAttempt) ||
+      settings.estimatedCostPerAttempt < 0 ||
+      settings.estimatedCostPerAttempt > 1_000_000
+    )
+  ) {
+    throw new ProxyConfigError(
+      "estimatedCostPerAttempt must be finite and between 0 and 1000000",
+      "INVALID_COST_CONFIGURATION",
+    );
+  }
+  if (
+    settings.costCurrency != null &&
+    !/^[A-Z]{3}$/.test(settings.costCurrency)
+  ) {
+    throw new ProxyConfigError(
+      "costCurrency must be a three-letter uppercase code",
+      "INVALID_COST_CONFIGURATION",
+    );
   }
   return Object.freeze({
     ...settings,
@@ -499,6 +556,8 @@ function failed(code, kind, context) {
     requestId: context.requestId,
     targetUrl: context.targetUrl,
     error: { code, kind },
+    estimatedCostPerAttempt: context.settings.estimatedCostPerAttempt,
+    costCurrency: context.settings.costCurrency,
   });
 }
 
@@ -541,6 +600,23 @@ function boolean(value, fallback) {
   if (String(value).toLowerCase() === "true") return true;
   if (String(value).toLowerCase() === "false") return false;
   throw new ProxyConfigError("Expected true or false", "INVALID_BOOLEAN_VALUE");
+}
+
+function optionalNumber(value, min, max) {
+  if (value == null || value === "") return null;
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < min || number > max) {
+    throw new ProxyConfigError(
+      `Expected finite number between ${min} and ${max}`,
+      "INVALID_COST_CONFIGURATION",
+    );
+  }
+  return number;
+}
+
+function currency(value) {
+  if (value == null || String(value).trim() === "") return null;
+  return String(value).trim().toUpperCase();
 }
 
 function defaultSleep(delayMs, signal) {

@@ -103,3 +103,28 @@ def test_http_and_private_targets_require_explicit_opt_in():
         for target in ("https://localhost./", "https://127.1/", "https://2130706433/"):
             with pytest.raises(ConfigError, match="PRIVATE_TARGETS"):
                 client.request("GET", target)
+
+
+def test_cost_configuration_is_optional_but_must_be_complete():
+    configured = ClientSettings.from_env(
+        {
+            "B2B_PROXY_URL": "http://proxy.example.test:8080",
+            "B2B_ESTIMATED_COST_PER_ATTEMPT": "0.0025",
+            "B2B_COST_CURRENCY": "usd",
+        }
+    )
+
+    assert configured.estimated_cost_per_attempt == 0.0025
+    assert configured.cost_currency == "USD"
+
+    with pytest.raises(ConfigError, match="must be set together"):
+        ClientSettings(
+            proxy_url="http://proxy.example.test:8080",
+            estimated_cost_per_attempt=0.1,
+        )
+    with pytest.raises(ConfigError, match="three-letter uppercase"):
+        ClientSettings(
+            proxy_url="http://proxy.example.test:8080",
+            estimated_cost_per_attempt=0.1,
+            cost_currency="usd",
+        )

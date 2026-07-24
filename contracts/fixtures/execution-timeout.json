@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "route": {
+    "selected": "http_proxy",
+    "reason": "configured_http_proxy",
+    "next_action": "review_retry_or_escalation",
+    "automatic_escalation": false,
+    "manual_candidates": [
+      "browser",
+      "managed_unblocker",
+      "ai_extraction"
+    ]
+  },
+  "quality": {
+    "outcome": "timeout",
+    "attempts": 3,
+    "retries": 2,
+    "elapsed_ms": 1500,
+    "status_code": null,
+    "response_bytes": null
+  },
+  "cost": {
+    "basis": "per_attempt",
+    "currency": "USD",
+    "unit_cost": 0.002,
+    "estimated_total": 0.006
+  }
+}

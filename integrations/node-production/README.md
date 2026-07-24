@@ -16,6 +16,8 @@ Node.js 20+. Решение использует программно настр
 - тело ответа доступно коду, но не попадает в JSON-отчёт;
 - путь, query, credentials и исходный текст transport error очищаются;
 - `Proxy-Authorization` нельзя отправить целевому серверу;
+- typed-блок `result.execution` одинаков с Python SDK и содержит route,
+  quality, next action и опциональную оценку cost;
 - офлайн-тесты не требуют настоящего прокси.
 
 > Используйте решение только для систем и данных, на работу с которыми у вашей
@@ -42,6 +44,16 @@ export B2B_TARGET_URL='https://service.example/health'
 npm exec -- andrey-proxy-node --pretty
 ```
 
+Опциональная оценка стоимости одной сетевой попытки:
+
+```bash
+export B2B_ESTIMATED_COST_PER_ATTEMPT='0.002'
+export B2B_COST_CURRENCY='USD'
+```
+
+Значения задаются только вместе. Без них SDK возвращает
+`cost.basis=not_configured`.
+
 ## Использование в коде
 
 ```js
@@ -54,6 +66,7 @@ try {
     "https://service.example/api/items?page=1",
     { requestId: "inventory-sync-0001" },
   );
+  console.log(result.execution.quality.outcome);
   if (!result.ok) throw new Error(JSON.stringify(result));
   const payload = result.json();
   console.log(payload.items.length);
@@ -61,6 +74,10 @@ try {
   await proxy.close();
 }
 ```
+
+`result.execution` типизирован в `client.d.ts`; тот же блок входит в
+`JSON.stringify(result)`. Поля и правила ручной эскалации:
+[Execution Contract](../../docs/EXECUTION-CONTRACT.md).
 
 `POST` автоматически не повторяется. Потоковое тело также не повторяется. Если
 target URL поступает от недоверенного пользователя, добавьте доменный allowlist
