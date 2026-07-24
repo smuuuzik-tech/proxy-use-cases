@@ -17,7 +17,7 @@ dependencies = [
 
 [project.optional-dependencies]
 socks = ["httpx[socks]>=0.28.0,<1.0"]
-dev = ["pytest>=8.0,<9.0"]
+dev = ["pytest>=8.0,<10.0"]
 
 [project.scripts]
 proxy-b2b = "proxy_b2b_client.cli:main"
